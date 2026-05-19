@@ -1,31 +1,58 @@
+# ==============
+# CMake build artifacts
+# ==============
+build/                      # Стандартная папка сборки
+build-*/                    # Любые папки сборки
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+CMakeUserPresets.json       # Локальные настройки CMake
+
+# ==============
 # Qt build artifacts
+# ==============
 *.o
-*.so
-*.so.*
-*.dll
-*.dylib
-*.a
+*.so, *.so.*
+*.dll, *.dylib
+*.a, *.lib
 moc_*.cpp
 moc_*.h
+*.moc
 ui_*.h
 qrc_*.cpp
 *.qmlc
+*.jsc
 
+# ==============
 # Build directories
-build-*/
+# ==============
 debug/
 release/
-Makefile*
-.qmake.cache
-.qmake.stash
-*.pro.user
-*.pro.user.*
+bin/
+lib/
+*.pro.user                  # Осталось от qmake (если переключитесь)
 
+# ==============
+# Qt Creator (поддерживает CMake)
+# ==============
+*.autosave
+.qtc_clangd/
+.qtc_clangd/
+compile_commands.json       # Можно добавить, но обычно генерируется
+
+# ==============
 # OS files
+# ==============
 .DS_Store
 Thumbs.db
 *.swp
-
-# Logs
-*.log
 *.tmp
+*.log
+
+# ==============
+# IDE (если используете VS Code, CLion и т.д.)
+# ==============
+.vscode/
+.idea/
+*.user

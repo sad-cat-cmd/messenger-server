@@ -1,0 +1,31 @@
+# Qt build artifacts
+*.o
+*.so
+*.so.*
+*.dll
+*.dylib
+*.a
+moc_*.cpp
+moc_*.h
+ui_*.h
+qrc_*.cpp
+*.qmlc
+
+# Build directories
+build-*/
+debug/
+release/
+Makefile*
+.qmake.cache
+.qmake.stash
+*.pro.user
+*.pro.user.*
+
+# OS files
+.DS_Store
+Thumbs.db
+*.swp
+
+# Logs
+*.log
+*.tmp

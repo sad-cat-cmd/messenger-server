@@ -21,7 +21,6 @@ set(SOURCES
 )
 set(HEADERS
     include/network.hpp
-    include/thread.hpp
 )
 
 add_executable(server_process

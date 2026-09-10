@@ -1,13 +1,13 @@
 # ==============
 # CMake build artifacts
 # ==============
-build/                      # Стандартная папка сборки
-build-*/                    # Любые папки сборки
+build/                      
+build-*/                    
 CMakeCache.txt
 CMakeFiles/
 cmake_install.cmake
 Makefile
-CMakeUserPresets.json       # Локальные настройки CMake
+CMakeUserPresets.json       
 
 # ==============
 # Qt build artifacts
@@ -31,7 +31,7 @@ debug/
 release/
 bin/
 lib/
-*.pro.user                  # Осталось от qmake (если переключитесь)
+*.pro.user                  
 
 # ==============
 # Qt Creator (поддерживает CMake)
@@ -39,7 +39,7 @@ lib/
 *.autosave
 .qtc_clangd/
 .qtc_clangd/
-compile_commands.json       # Можно добавить, но обычно генерируется
+compile_commands.json       
 
 # ==============
 # OS files

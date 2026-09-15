@@ -18,9 +18,11 @@ set(LIBRARY_BUILD_PATH ${LIBRARY_PATH}/build)
 set(SOURCES
     src/main.cpp
     src/network.cpp
+    src/exceptions.cpp
 )
 set(HEADERS
     include/network.hpp
+    include/exceptions.hpp
 )
 
 add_executable(server_process

@@ -28,6 +28,14 @@ namespace network {
         const qsizetype MAX_SIZE_TEXT_FILE_NAME = 255;
         constexpr size_t MAX_SIZE_BYTE_FILE = 1024 * 1024 * 64;
         constexpr size_t SIZE_BYTE_FILE_CHUNK = 1024 * 64;
+        const qint64 NUM_OPERATION_GET_ALL_CHAT_ID = 1;
+        const qint64 NUM_OPERATION_GET_CHAT_INFO = 2;
+        const qint64 NUM_OPERATION_GET_MSG_CHAT = 3;
+        const qint64 NUM_OPERATION_GET_CHAT_FILE = 4;
+        const qint64 NUM_OPERATION_GET_CHAT_FILE_CHUNK = 5;
+        const qint64 NUM_OPERATION_END_TRANSACTION = 6;
+        const qint64 NUM_OPERATION_LOG_OUT = 7;
+        const qint64 NUM_OPERATION_LOG_IN = 8;
 
         QString generateRequestsCode() noexcept;
 
@@ -138,84 +146,133 @@ namespace network {
         // додумать и дописать класс для отправки списка идентефикаторов чатов клиента
         class ServerResponseGetAllChatId{};
         //
-        class ClientRequestGetAllChatId {
-        private:
+        // додумать и дописать класс для отправки информации о залогиненом пользователе
+        class ServerResponseLogIN{};
+        //
+        class BaseClientRequest {
+        protected:
             QString requestsCode;
-            const qsizetype numOperation = 1;
+            qint64 numOperation;
         public:
-            ClientRequestGetAllChatId();
-            QString getRequstCode() noexcept;
-            qsizetype getNumOperation() noexcept;
+            BaseClientRequest(const QString & code,
+                              qint64 numOperation);
+            qint64 getNumOperation() noexcept;
+            QString getRequestCode() noexcept;
         };
 
-        QDataStream &operator<< (QDataStream & out,
-                                 const network::transmitted_objects::ClientRequestGetAllChatId & request);
-        QDataStream &operator>> (QDataStream & in,
-                                 network::transmitted_objects::ClientRequestGetAllChatId &request);
-
-        class ClientRequestGetChatInformation {
+        class ClientRequestGetAllChatId : public BaseClientRequest{
         private:
-            std::string requestsCode;
-            qsizetype numOperation = 2;
+        public:
+            ClientRequestGetAllChatId(const QString& code);
+            friend QDataStream &operator<< (QDataStream & out,
+                                            const network::transmitted_objects::ClientRequestGetAllChatId & request) noexcept;
+            friend QDataStream &operator>> (QDataStream & in,
+                                            network::transmitted_objects::ClientRequestGetAllChatId &request) noexcept;
+        };
+        QDataStream &operator<< (QDataStream & out,
+                                 const network::transmitted_objects::ClientRequestGetAllChatId & request) noexcept;
+        QDataStream &operator>> (QDataStream & in,
+                                 network::transmitted_objects::ClientRequestGetAllChatId &request) noexcept;
+
+        class ClientRequestGetChatInformation : public BaseClientRequest{
+        private:
             QString id;
         public:
-            ClientRequestGetChatInformation(const std::string code);
-            int getNumOperation = 3;
+            ClientRequestGetChatInformation(const QString & code,
+                                            const QString & idChat);
+            QString getIdChat() noexcept;
+            friend QDataStream &operator<< (QDataStream & out,
+                                    const network::transmitted_objects::ClientRequestGetChatInformation & request) noexcept;
+            friend QDataStream &operator>> (QDataStream & in,
+                                    network::transmitted_objects::ClientRequestGetChatInformation &request) noexcept;
         };
         QDataStream &operator<< (QDataStream & out,
-                                 const network::transmitted_objects::ClientRequestGetChatInformation & request);
+                                 const network::transmitted_objects::ClientRequestGetChatInformation & request) noexcept;
         QDataStream &operator>> (QDataStream & in,
-                                 network::transmitted_objects::ClientRequestGetChatInformation &request);
+                                 network::transmitted_objects::ClientRequestGetChatInformation &request) noexcept;
 
-        class ClientRequestGetMsgChat {
+        class ClientRequestGetMsgChat : public BaseClientRequest{
         private:
-            std::string requestsCode;
-            int numOperation = 3;
-            int numMsg;
+            qint64 numMsg;
         public:
-            ClientRequestGetMsgChat(const std::string requestsCode,
-                                    const int numMsg);
-            int getNumMsg();
-            int getNumOperation();
+            ClientRequestGetMsgChat(const QString & code,
+                                    const int numberMsg);
+            qint64 getNumMsg() noexcept;
+            friend QDataStream &operator<< (QDataStream & out,
+                                            const ClientRequestGetMsgChat & request) noexcept;
+            friend QDataStream &operator>> (QDataStream & in,
+                                            ClientRequestGetMsgChat &request) noexcept;
         };
-
         QDataStream &operator<< (QDataStream & out,
-                                 const ClientRequestGetMsgChat & request);
+                                 const ClientRequestGetMsgChat & request) noexcept;
         QDataStream &operator>> (QDataStream & in,
-                                 ClientRequestGetMsgChat &request);
+                                 ClientRequestGetMsgChat &request) noexcept;
 
 
-        class ClientRequestGetFile {
+        class ClientRequestGetFile : public BaseClientRequest{
         private:
-            std::string requestsCode;
-            std::string fileName;
-            int numOperation = 4;
+            QString fileName;
         public:
-            ClientRequestGetFile(const std::string code,
-                                 const std::string fileName);
-            std::string getRequestsCode();
-            std::string getFileName();
-            int getNumOperation();
+            ClientRequestGetFile(const QString code,
+                                 const QString fileName);
+            QString getFileName() noexcept;
+            friend QDataStream &operator<< (QDataStream & out,
+                                            const ClientRequestGetFile & request) noexcept;
+            friend QDataStream &operator>> (QDataStream & in,
+                                            ClientRequestGetFile &request) noexcept;
         };
-
         QDataStream &operator<< (QDataStream & out,
-                                 const ClientRequestGetFile & request);
+                                 const ClientRequestGetFile & request) noexcept;
         QDataStream &operator>> (QDataStream & in,
-                                 ClientRequestGetFile &request);
+                                 ClientRequestGetFile &request) noexcept;
 
-        class ClientRequestEndTransactionClient {
+        class ClientRequestEndTransactionClient : public BaseClientRequest{
         private:
-            std::string requestsCode;
-            int numOperation = 5;
         public:
-            ClientRequestEndTransactionClient(const std::string & code);
-            std::string getRequestsCode();
-            int getNumOperation();
+            ClientRequestEndTransactionClient(const QString & code);
+            friend QDataStream &operator<< (QDataStream & out,
+                                            const ClientRequestEndTransactionClient & request) noexcept;
+            friend QDataStream &operator>> (QDataStream & in,
+                                            ClientRequestEndTransactionClient &request) noexcept;
         };
         QDataStream &operator<< (QDataStream & out,
-                                 const ClientRequestEndTransactionClient & request);
+                                 const ClientRequestEndTransactionClient & request) noexcept;
         QDataStream &operator>> (QDataStream & in,
-                                 ClientRequestEndTransactionClient &request);
+                                 ClientRequestEndTransactionClient &request) noexcept;
+
+        class ClientRequestLogIn : public BaseClientRequest {
+        private:
+            QString username;
+            QString password;
+        public:
+            ClientRequestLogIn(const QString & code,
+                               const QString & username,
+                               const QString & password);
+            QString getUsername() noexcept;
+            QString getPassword() noexcept;
+            friend QDataStream &operator<< (QDataStream & out,
+                                            const ClientRequestLogIn & request) noexcept;
+            friend QDataStream &operator>> (QDataStream & in,
+                                            ClientRequestLogIn &request) noexcept;
+        };
+        QDataStream &operator<< (QDataStream & out,
+                                 const ClientRequestLogIn & request) noexcept;
+        QDataStream &operator>> (QDataStream & in,
+                                 ClientRequestLogIn &request) noexcept;
+
+        class ClientRequestLogOut : public BaseClientRequest {
+        private:
+        public:
+            ClientRequestLogOut(const QString & code);
+            friend QDataStream &operator<< (QDataStream & out,
+                                            const ClientRequestLogOut & request) noexcept;
+            friend QDataStream &operator>> (QDataStream & in,
+                                            ClientRequestLogOut &request) noexcept;
+        };
+        QDataStream &operator<< (QDataStream & out,
+                                 const ClientRequestLogOut & request) noexcept;
+        QDataStream &operator>> (QDataStream & in,
+                                 ClientRequestLogOut &request) noexcept;
     }
 
     class Socket {

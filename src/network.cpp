@@ -186,7 +186,219 @@ QDataStream & network::transmitted_objects::operator>> (QDataStream & in,
     return in;
 }
 
+network::transmitted_objects::BaseClientRequest::BaseClientRequest(const QString &code,
+                                                                  qint64 numOperation)
+                                                                  : requestsCode(code),
+                                                                    numOperation(numOperation)
+{
+    if (this->requestsCode.isEmpty()) {
+        throw custom_exc_network::ExceptionCreateRequest(QString("Error: value code in constructor BaseRequest is empty"),
+                                                          1);
+    }
+    if (this->numOperation <= 0) {
+        throw custom_exc_network::ExceptionCreateRequest(QString("Error: value code in constructor BaseRequest is less or equeul 0"),
+                                                          1);
+    }
+}
+qint64 network::transmitted_objects::BaseClientRequest::getNumOperation() noexcept
+{
+    return this->numOperation;
+}
+QString network::transmitted_objects::BaseClientRequest::getRequestCode() noexcept
+{
+    return this->requestsCode;
+}
 
+network::transmitted_objects::ClientRequestGetAllChatId::ClientRequestGetAllChatId(const QString& code)
+                                                                                   try : network::transmitted_objects::BaseClientRequest(code,network::transmitted_objects::NUM_OPERATION_GET_ALL_CHAT_ID)
+{}
+catch(custom_exc_network::ExceptionCreateResponse & exc)
+{
+    throw custom_exc_network::ExceptionCreateRequest(QString("Error: value code in constructor ClientRequestGetAllChatId is empty"),
+                                                      1);
+}
+QDataStream & network::transmitted_objects::operator<< (QDataStream & out,
+                                                        const network::transmitted_objects::ClientRequestGetAllChatId & request) noexcept
+{
+    out << request.requestsCode << request.numOperation;
+    return out;
+}
+QDataStream & network::transmitted_objects::operator>> (QDataStream & in,
+                                                        network::transmitted_objects::ClientRequestGetAllChatId &request) noexcept
+{
+    in >> request.requestsCode >> request.numOperation;
+    return in;
+}
+
+network::transmitted_objects::ClientRequestGetChatInformation::ClientRequestGetChatInformation(const QString & code,
+                                                                                               const QString & idChat)
+                                                                                               try : network::transmitted_objects::BaseClientRequest(code, network::transmitted_objects::NUM_OPERATION_GET_CHAT_INFO),
+                                                                                                     id(idChat)
+{
+    if (this->id.isEmpty()) {
+        throw custom_exc_network::ExceptionCreateRequest(QString("Error: value idChat in constructor ClientRequestGetChatInformation is empty"),
+                                                         1);
+    }
+}
+catch (custom_exc_network::ExceptionCreateRequest & exc) {
+    throw custom_exc_network::ExceptionCreateRequest(QString("Error: value code in constructor ClientRequestGetChatInformation is empty"),
+                                                     1);
+}
+QString network::transmitted_objects::ClientRequestGetChatInformation::getIdChat() noexcept
+{
+    return this->id;
+}
+QDataStream & network::transmitted_objects::operator<< (QDataStream & out,
+                                                        const network::transmitted_objects::ClientRequestGetChatInformation & request) noexcept
+{
+    out << request.requestsCode << request.numOperation << request.id;
+    return out;
+}
+QDataStream & network::transmitted_objects::operator>> (QDataStream & in,
+                                                        network::transmitted_objects::ClientRequestGetChatInformation &request) noexcept
+{
+    in >> request.requestsCode >> request.numOperation >> request.id;
+    return in;
+}
+
+network::transmitted_objects::ClientRequestGetMsgChat::ClientRequestGetMsgChat(const QString & code,
+                                                                               const int numberMsg)
+                                                                               try : network::transmitted_objects::BaseClientRequest(code, network::transmitted_objects::NUM_OPERATION_GET_MSG_CHAT),
+                                                                                     numMsg(numberMsg)
+{
+    if (this->numMsg <= 0) {
+        throw custom_exc_network::ExceptionCreateRequest(QString("Error: value numberMsg in constructor ClientRequestGetMsgChat is less or equil 0"),
+                                                         1);
+    }
+}
+catch (custom_exc_network::ExceptionCreateRequest & exc) {
+    throw custom_exc_network::ExceptionCreateRequest(QString("Error: value code in constructor ClientRequestGetMsgChat is empty"),
+                                                     1);
+}
+qint64 network::transmitted_objects::ClientRequestGetMsgChat::getNumMsg() noexcept
+{
+    return this->numMsg;
+}
+QDataStream & network::transmitted_objects::operator<< (QDataStream & out,
+                                                        const ClientRequestGetMsgChat & request) noexcept
+{
+    out << request.requestsCode << request.numOperation << request.numMsg;
+    return out;
+}
+QDataStream & network::transmitted_objects::operator>> (QDataStream & in,
+                                                        ClientRequestGetMsgChat &request) noexcept
+{
+    in >> request.requestsCode >> request.numOperation >> request.numMsg;
+    return in;
+}
+
+network::transmitted_objects::ClientRequestGetFile::ClientRequestGetFile(const QString code,
+                                                                         const QString fileName)
+                                                                         try : network::transmitted_objects::BaseClientRequest(code, network::transmitted_objects::NUM_OPERATION_GET_CHAT_FILE),
+                                                                               fileName(fileName)
+{
+    if (this->fileName.isEmpty()) {
+        throw custom_exc_network::ExceptionCreateRequest(QString("Error: value fileName in constructor ClientRequestGetFile is empty"),
+                                                         1);
+    }
+}
+catch (custom_exc_network::ExceptionCreateRequest & exc) {
+    throw custom_exc_network::ExceptionCreateRequest(QString("Error: value code in constructor ClientRequestGetFile is empty"),
+                                                     1);
+}
+QString network::transmitted_objects::ClientRequestGetFile::getFileName() noexcept
+{
+    return this->fileName;
+}
+QDataStream & network::transmitted_objects::operator<< (QDataStream & out,
+                                                        const ClientRequestGetFile & request) noexcept
+{
+    out << request.requestsCode << request.numOperation << request.fileName;
+    return out;
+}
+QDataStream &network::transmitted_objects::operator>> (QDataStream & in,
+                                                       ClientRequestGetFile &request) noexcept
+{
+    in >> request.requestsCode >> request.numOperation >> request.fileName;
+    return in;
+}
+
+network::transmitted_objects::ClientRequestEndTransactionClient::ClientRequestEndTransactionClient(const QString& code)
+                                                                                                   try : network::transmitted_objects::BaseClientRequest(code,network::transmitted_objects::NUM_OPERATION_END_TRANSACTION)
+{}
+catch(custom_exc_network::ExceptionCreateResponse & exc)
+{
+    throw custom_exc_network::ExceptionCreateRequest(QString("Error: value code in constructor ClientRequestEndTransactionClient is empty"),
+                                                     1);
+}
+QDataStream & network::transmitted_objects::operator<< (QDataStream & out,
+                                                        const ClientRequestEndTransactionClient & request) noexcept
+{
+    out << request.requestsCode << request.numOperation;
+    return out;
+}
+QDataStream & network::transmitted_objects::operator>> (QDataStream & in,
+                                                        ClientRequestEndTransactionClient &request) noexcept
+{
+    in >> request.requestsCode >> request.numOperation;
+    return in;
+}
+
+network::transmitted_objects::ClientRequestLogIn::ClientRequestLogIn(const QString & code,
+                                                                     const QString & username,
+                                                                     const QString & password)
+                                                                     try : network::transmitted_objects::BaseClientRequest(code,network::transmitted_objects::NUM_OPERATION_LOG_IN),
+                                                                           username(username),
+                                                                           password(password)
+{
+    if (this->username.isEmpty()){
+        throw custom_exc_network::ExceptionCreateRequest(QString("Error: value username in constructor ClientRequestLogIn is empty"),
+                                                         1);
+    }
+    if (this->password.isEmpty()) {
+        throw custom_exc_network::ExceptionCreateRequest(QString("Error: value password in constructor ClientRequestLogIn is empty"),
+                                                         1);
+    }
+}
+catch(custom_exc_network::ExceptionCreateResponse & exc)
+{
+    throw custom_exc_network::ExceptionCreateRequest(QString("Error: value code in constructor ClientRequestLogIn is empty"),
+                                                     1);
+}
+
+QDataStream & network::transmitted_objects::operator<< (QDataStream & out,
+                                                        const ClientRequestLogIn & request) noexcept
+{
+    out << request.requestsCode <<request.numOperation << request.username << request.password;
+    return out;
+}
+QDataStream & network::transmitted_objects::operator>> (QDataStream & in,
+                                                        ClientRequestLogIn &request) noexcept
+{
+    in >> request.requestsCode >> request.numOperation >> request.username >> request.password;
+    return in;
+}
+
+network::transmitted_objects::ClientRequestLogOut::ClientRequestLogOut(const QString& code)
+                                                                       try : network::transmitted_objects::BaseClientRequest(code,network::transmitted_objects::NUM_OPERATION_LOG_OUT)
+{}
+catch(custom_exc_network::ExceptionCreateResponse & exc)
+{
+    throw custom_exc_network::ExceptionCreateRequest(QString("Error: value code in constructor ClientRequestLogOut is empty"),
+                                                     1);
+}
+QDataStream & network::transmitted_objects::operator<< (QDataStream & out,
+                                                      const ClientRequestLogOut & request) noexcept
+{
+    out << request.requestsCode << request.numOperation;
+    return out;
+}
+QDataStream & network::transmitted_objects::operator>> (QDataStream & in,
+                                                      ClientRequestLogOut &request) noexcept
+{
+    in >> request.requestsCode >> request.numOperation;
+    return in;
+}
 
 network::Socket::Socket(int numSocket) : numberSocket(numSocket)
 {}

@@ -11,6 +11,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Core)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core)
+find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Core Sql)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core Sql)
 
 set(LIBRARY_PATH ${CMAKE_SOURCE_DIR}/../library)
 set(LIBRARY_BUILD_PATH ${LIBRARY_PATH}/build)
@@ -19,12 +21,13 @@ set(SOURCES
     src/main.cpp
     src/network.cpp
     src/exceptions.cpp
+    src/database.cpp
 )
 set(HEADERS
     include/network.hpp
     include/exceptions.hpp
+    include/database.hpp
 )
-
 add_executable(server_process
    ${SOURCES} ${HEADERS}
 )
@@ -36,7 +39,10 @@ target_include_directories(server_process
         ${LIBRARY_PATH}/include
 )
 
-target_link_libraries(server_process Qt${QT_VERSION_MAJOR}::Core)
+target_link_libraries(server_process
+    Qt${QT_VERSION_MAJOR}::Core
+    Qt${QT_VERSION_MAJOR}::Sql
+)
 
 include(GNUInstallDirs)
 install(TARGETS server_process

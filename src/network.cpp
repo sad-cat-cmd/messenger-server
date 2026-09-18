@@ -32,8 +32,8 @@ network::transmitted_objects::ServerResponseError::ServerResponseError(const QSt
                                                                        status(status)
 {
     if (this->errorMsg.isEmpty()) {
-        throw custom_exc_network::ExceptionCreateResponse(QString("Error: value errMsg in constructor ServerResponseError is empty"),
-                                                          1);
+        throw custom_exc::network::ExceptionCreateResponse(QString("Error: value errMsg in constructor ServerResponseError is empty"),
+                                                           1);
     }
 }
 
@@ -63,19 +63,19 @@ network::transmitted_objects::ServerResponseGetChatInformation::ServerResponseGe
                                                                                                   countMsg(countMsg)
 {
     if (this->nameCopyist.isEmpty()) {
-        throw custom_exc_network::ExceptionCreateResponse(QString("Error: value copyist in constructor ServerResponseGetChatInformation is empty"),
+        throw custom_exc::network::ExceptionCreateResponse(QString("Error: value copyist in constructor ServerResponseGetChatInformation is empty"),
                                                           1);
     }
     if (this->statusCopyist.isEmpty()) {
-        throw custom_exc_network::ExceptionCreateResponse(QString("Error: value status in constructor ServerResponseGetChatInformation is empty"),
+        throw custom_exc::network::ExceptionCreateResponse(QString("Error: value status in constructor ServerResponseGetChatInformation is empty"),
                                                           1);
     }
     if (this->statusCopyist != network::transmitted_objects::STATUS_ONLINE_COPYIST && this->statusCopyist != network::transmitted_objects::STATUS_OFFLINE_COPYIST) {
-        throw custom_exc_network::ExceptionCreateResponse(QString("Error: value status in constructor ServerResponseGetChatInformation is unvalid. Valid statuses: STATUS_ONLINE_COPYIST, STATUS_OFFLINE_COPYIST"),
+        throw custom_exc::network::ExceptionCreateResponse(QString("Error: value status in constructor ServerResponseGetChatInformation is unvalid. Valid statuses: STATUS_ONLINE_COPYIST, STATUS_OFFLINE_COPYIST"),
                                                           1);
     }
     if (countMsg < 0) {
-        throw custom_exc_network::ExceptionCreateResponse(QString("Error: value status in constructor ServerResponseGetChatInformation is less 0."),
+        throw custom_exc::network::ExceptionCreateResponse(QString("Error: value status in constructor ServerResponseGetChatInformation is less 0."),
                                                           1);
     }
 }
@@ -114,27 +114,27 @@ network::transmitted_objects::ServerResponseGetMsgChat::ServerResponseGetMsgChat
                                                                                    flagFile(flagFile)
 {
     if (this->msg.isEmpty()) {
-        throw custom_exc_network::ExceptionCreateResponse(QString("Error: value message in constructor ServerResponseGetMsgChat is empty"),
+        throw custom_exc::network::ExceptionCreateResponse(QString("Error: value message in constructor ServerResponseGetMsgChat is empty"),
                                                           1);
     }
     if (this->msg.size() >network::transmitted_objects::MAX_SIZE_TEXT_STRING && this->flagFile == false) {
-        throw custom_exc_network::ExceptionCreateResponse(QString("Error: value message in constructor ServerResponseGetMsgChat is more MAX_SIZE_TEXT_STRING"),
+        throw custom_exc::network::ExceptionCreateResponse(QString("Error: value message in constructor ServerResponseGetMsgChat is more MAX_SIZE_TEXT_STRING"),
                                                           1);
     }
     if (this->msg.size() >network::transmitted_objects::MAX_SIZE_TEXT_FILE_NAME && this->flagFile == true) {
-        throw custom_exc_network::ExceptionCreateResponse(QString("Error: value message in constructor ServerResponseGetMsgChat is more MAX_SIZE_TEXT_FILE_NAME"),
+        throw custom_exc::network::ExceptionCreateResponse(QString("Error: value message in constructor ServerResponseGetMsgChat is more MAX_SIZE_TEXT_FILE_NAME"),
                                                           1);
     }
     if (this->statusRead.isEmpty()) {
-        throw custom_exc_network::ExceptionCreateResponse(QString("Error: value statusRead in constructor ServerResponseGetMsgChat is empty"),
+        throw custom_exc::network::ExceptionCreateResponse(QString("Error: value statusRead in constructor ServerResponseGetMsgChat is empty"),
                                                           1);
     }
     if (this->statusRead != network::transmitted_objects::STATUS_READED_MSG && this->statusRead != network::transmitted_objects::STATUS_UNREADED_MSG) {
-        throw custom_exc_network::ExceptionCreateResponse(QString("Error: value status in constructor ServerResponseGetChatInformation is unvalid. Valid statuses: read, notread"),
+        throw custom_exc::network::ExceptionCreateResponse(QString("Error: value status in constructor ServerResponseGetChatInformation is unvalid. Valid statuses: read, notread"),
                                                           1);
     }
     if (this->owner.isEmpty()) {
-        throw custom_exc_network::ExceptionCreateResponse(QString("Error: value messageOwner in constructor ServerResponseGetMsgChat is empty"),
+        throw custom_exc::network::ExceptionCreateResponse(QString("Error: value messageOwner in constructor ServerResponseGetMsgChat is empty"),
                                                           1);
     }
 }
@@ -156,11 +156,11 @@ network::transmitted_objects::ServerResponseGetFileInfo::ServerResponseGetFileIn
       countChunk(countChunk)
 {
     if (flagGood == true && countChunk < 0) {
-        throw custom_exc_network::ExceptionCreateResponse(QString("Error: value countChunk in constructor ServerResponseGetFileInfo is less 0, but flagGood = true"),
+        throw custom_exc::network::ExceptionCreateResponse(QString("Error: value countChunk in constructor ServerResponseGetFileInfo is less 0, but flagGood = true"),
                                                   1);
     }
     if (flagGood == false && countChunk != -1) {
-        throw custom_exc_network::ExceptionCreateResponse(QString("Error: value countChunk in constructor ServerResponseGetFileInfo does not equels -1, but flagGood = false"),
+        throw custom_exc::network::ExceptionCreateResponse(QString("Error: value countChunk in constructor ServerResponseGetFileInfo does not equels -1, but flagGood = false"),
                                                   1);
     }
 }
@@ -192,11 +192,11 @@ network::transmitted_objects::BaseClientRequest::BaseClientRequest(const QString
                                                                     numOperation(numOperation)
 {
     if (this->requestsCode.isEmpty()) {
-        throw custom_exc_network::ExceptionCreateRequest(QString("Error: value code in constructor BaseRequest is empty"),
+        throw custom_exc::network::ExceptionCreateRequest(QString("Error: value code in constructor BaseRequest is empty"),
                                                           1);
     }
     if (this->numOperation <= 0) {
-        throw custom_exc_network::ExceptionCreateRequest(QString("Error: value code in constructor BaseRequest is less or equeul 0"),
+        throw custom_exc::network::ExceptionCreateRequest(QString("Error: value code in constructor BaseRequest is less or equeul 0"),
                                                           1);
     }
 }
@@ -212,9 +212,9 @@ QString network::transmitted_objects::BaseClientRequest::getRequestCode() noexce
 network::transmitted_objects::ClientRequestGetAllChatId::ClientRequestGetAllChatId(const QString& code)
                                                                                    try : network::transmitted_objects::BaseClientRequest(code,network::transmitted_objects::NUM_OPERATION_GET_ALL_CHAT_ID)
 {}
-catch(custom_exc_network::ExceptionCreateResponse & exc)
+catch(custom_exc::network::ExceptionCreateResponse & exc)
 {
-    throw custom_exc_network::ExceptionCreateRequest(QString("Error: value code in constructor ClientRequestGetAllChatId is empty"),
+    throw custom_exc::network::ExceptionCreateRequest(QString("Error: value code in constructor ClientRequestGetAllChatId is empty"),
                                                       1);
 }
 QDataStream & network::transmitted_objects::operator<< (QDataStream & out,
@@ -236,13 +236,13 @@ network::transmitted_objects::ClientRequestGetChatInformation::ClientRequestGetC
                                                                                                      id(idChat)
 {
     if (this->id.isEmpty()) {
-        throw custom_exc_network::ExceptionCreateRequest(QString("Error: value idChat in constructor ClientRequestGetChatInformation is empty"),
-                                                         1);
+        throw custom_exc::network::ExceptionCreateRequest(QString("Error: value idChat in constructor ClientRequestGetChatInformation is empty"),
+                                                                  1);
     }
 }
-catch (custom_exc_network::ExceptionCreateRequest & exc) {
-    throw custom_exc_network::ExceptionCreateRequest(QString("Error: value code in constructor ClientRequestGetChatInformation is empty"),
-                                                     1);
+catch (custom_exc::network::ExceptionCreateRequest & exc) {
+    throw custom_exc::network::ExceptionCreateRequest(QString("Error: value code in constructor ClientRequestGetChatInformation is empty"),
+                                                             1);
 }
 QString network::transmitted_objects::ClientRequestGetChatInformation::getIdChat() noexcept
 {
@@ -267,13 +267,13 @@ network::transmitted_objects::ClientRequestGetMsgChat::ClientRequestGetMsgChat(c
                                                                                      numMsg(numberMsg)
 {
     if (this->numMsg <= 0) {
-        throw custom_exc_network::ExceptionCreateRequest(QString("Error: value numberMsg in constructor ClientRequestGetMsgChat is less or equil 0"),
-                                                         1);
+        throw custom_exc::network::ExceptionCreateRequest(QString("Error: value numberMsg in constructor ClientRequestGetMsgChat is less or equil 0"),
+                                                          1);
     }
 }
-catch (custom_exc_network::ExceptionCreateRequest & exc) {
-    throw custom_exc_network::ExceptionCreateRequest(QString("Error: value code in constructor ClientRequestGetMsgChat is empty"),
-                                                     1);
+catch (custom_exc::network::ExceptionCreateRequest & exc) {
+    throw custom_exc::network::ExceptionCreateRequest(QString("Error: value code in constructor ClientRequestGetMsgChat is empty"),
+                                                      1);
 }
 qint64 network::transmitted_objects::ClientRequestGetMsgChat::getNumMsg() noexcept
 {
@@ -298,13 +298,13 @@ network::transmitted_objects::ClientRequestGetFile::ClientRequestGetFile(const Q
                                                                                fileName(fileName)
 {
     if (this->fileName.isEmpty()) {
-        throw custom_exc_network::ExceptionCreateRequest(QString("Error: value fileName in constructor ClientRequestGetFile is empty"),
-                                                         1);
+        throw custom_exc::network::ExceptionCreateRequest(QString("Error: value fileName in constructor ClientRequestGetFile is empty"),
+                                                          1);
     }
 }
-catch (custom_exc_network::ExceptionCreateRequest & exc) {
-    throw custom_exc_network::ExceptionCreateRequest(QString("Error: value code in constructor ClientRequestGetFile is empty"),
-                                                     1);
+catch (custom_exc::network::ExceptionCreateRequest & exc) {
+    throw custom_exc::network::ExceptionCreateRequest(QString("Error: value code in constructor ClientRequestGetFile is empty"),
+                                                      1);
 }
 QString network::transmitted_objects::ClientRequestGetFile::getFileName() noexcept
 {
@@ -326,10 +326,10 @@ QDataStream &network::transmitted_objects::operator>> (QDataStream & in,
 network::transmitted_objects::ClientRequestEndTransactionClient::ClientRequestEndTransactionClient(const QString& code)
                                                                                                    try : network::transmitted_objects::BaseClientRequest(code,network::transmitted_objects::NUM_OPERATION_END_TRANSACTION)
 {}
-catch(custom_exc_network::ExceptionCreateResponse & exc)
+catch(custom_exc::network::ExceptionCreateResponse & exc)
 {
-    throw custom_exc_network::ExceptionCreateRequest(QString("Error: value code in constructor ClientRequestEndTransactionClient is empty"),
-                                                     1);
+    throw custom_exc::network::ExceptionCreateRequest(QString("Error: value code in constructor ClientRequestEndTransactionClient is empty"),
+                                                      1);
 }
 QDataStream & network::transmitted_objects::operator<< (QDataStream & out,
                                                         const ClientRequestEndTransactionClient & request) noexcept
@@ -352,17 +352,17 @@ network::transmitted_objects::ClientRequestLogIn::ClientRequestLogIn(const QStri
                                                                            password(password)
 {
     if (this->username.isEmpty()){
-        throw custom_exc_network::ExceptionCreateRequest(QString("Error: value username in constructor ClientRequestLogIn is empty"),
+        throw custom_exc::network::ExceptionCreateRequest(QString("Error: value username in constructor ClientRequestLogIn is empty"),
                                                          1);
     }
     if (this->password.isEmpty()) {
-        throw custom_exc_network::ExceptionCreateRequest(QString("Error: value password in constructor ClientRequestLogIn is empty"),
+        throw custom_exc::network::ExceptionCreateRequest(QString("Error: value password in constructor ClientRequestLogIn is empty"),
                                                          1);
     }
 }
-catch(custom_exc_network::ExceptionCreateResponse & exc)
+catch(custom_exc::network::ExceptionCreateResponse & exc)
 {
-    throw custom_exc_network::ExceptionCreateRequest(QString("Error: value code in constructor ClientRequestLogIn is empty"),
+    throw custom_exc::network::ExceptionCreateRequest(QString("Error: value code in constructor ClientRequestLogIn is empty"),
                                                      1);
 }
 
@@ -382,9 +382,9 @@ QDataStream & network::transmitted_objects::operator>> (QDataStream & in,
 network::transmitted_objects::ClientRequestLogOut::ClientRequestLogOut(const QString& code)
                                                                        try : network::transmitted_objects::BaseClientRequest(code,network::transmitted_objects::NUM_OPERATION_LOG_OUT)
 {}
-catch(custom_exc_network::ExceptionCreateResponse & exc)
+catch(custom_exc::network::ExceptionCreateResponse & exc)
 {
-    throw custom_exc_network::ExceptionCreateRequest(QString("Error: value code in constructor ClientRequestLogOut is empty"),
+    throw custom_exc::network::ExceptionCreateRequest(QString("Error: value code in constructor ClientRequestLogOut is empty"),
                                                      1);
 }
 QDataStream & network::transmitted_objects::operator<< (QDataStream & out,

@@ -160,7 +160,7 @@ namespace network {
             QString getRequestCode() noexcept;
         };
 
-        class ClientRequestGetAllChatId : public BaseClientRequest{
+        class ClientRequestGetAllChatId : public transmitted_objects::BaseClientRequest{
         private:
         public:
             ClientRequestGetAllChatId(const QString& code);
@@ -174,7 +174,7 @@ namespace network {
         QDataStream &operator>> (QDataStream & in,
                                  network::transmitted_objects::ClientRequestGetAllChatId &request) noexcept;
 
-        class ClientRequestGetChatInformation : public BaseClientRequest{
+        class ClientRequestGetChatInformation : public transmitted_objects::BaseClientRequest{
         private:
             QString id;
         public:
@@ -191,7 +191,7 @@ namespace network {
         QDataStream &operator>> (QDataStream & in,
                                  network::transmitted_objects::ClientRequestGetChatInformation &request) noexcept;
 
-        class ClientRequestGetMsgChat : public BaseClientRequest{
+        class ClientRequestGetMsgChat : public transmitted_objects::BaseClientRequest{
         private:
             qint64 numMsg;
         public:
@@ -209,7 +209,7 @@ namespace network {
                                  ClientRequestGetMsgChat &request) noexcept;
 
 
-        class ClientRequestGetFile : public BaseClientRequest{
+        class ClientRequestGetFile : public transmitted_objects::BaseClientRequest{
         private:
             QString fileName;
         public:
@@ -226,7 +226,7 @@ namespace network {
         QDataStream &operator>> (QDataStream & in,
                                  ClientRequestGetFile &request) noexcept;
 
-        class ClientRequestEndTransactionClient : public BaseClientRequest{
+        class ClientRequestEndTransactionClient : public transmitted_objects::BaseClientRequest{
         private:
         public:
             ClientRequestEndTransactionClient(const QString & code);
@@ -240,7 +240,7 @@ namespace network {
         QDataStream &operator>> (QDataStream & in,
                                  ClientRequestEndTransactionClient &request) noexcept;
 
-        class ClientRequestLogIn : public BaseClientRequest {
+        class ClientRequestLogIn : public transmitted_objects::BaseClientRequest {
         private:
             QString username;
             QString password;
@@ -260,7 +260,7 @@ namespace network {
         QDataStream &operator>> (QDataStream & in,
                                  ClientRequestLogIn &request) noexcept;
 
-        class ClientRequestLogOut : public BaseClientRequest {
+        class ClientRequestLogOut : public transmitted_objects::BaseClientRequest {
         private:
         public:
             ClientRequestLogOut(const QString & code);

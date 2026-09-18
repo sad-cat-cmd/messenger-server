@@ -1,25 +1,25 @@
 #include <exceptions.hpp>
 
-custom_exc_network::ExceptionCreateResponse::ExceptionCreateResponse(const QString & msg,
-                                                                     const int statusCode)
-                                                                     : msg(msg),
-                                                                     statusCode(statusCode)
+custom_exc::BaseException::BaseException(const QString &messange,
+                                         const quint64 code)
+                                         : msg(messange),
+                                           statusCode(code)
 {}
-QString custom_exc_network::ExceptionCreateResponse::getMsg() noexcept {
+QString custom_exc::BaseException::getMsg() noexcept
+{
     return this->msg;
 }
-int custom_exc_network::ExceptionCreateResponse::getStatusCode() noexcept {
+qint64 custom_exc::BaseException::getStatusCode() noexcept
+{
     return this->statusCode;
 }
 
-custom_exc_network::ExceptionCreateRequest::ExceptionCreateRequest(const QString & msg,
-                                                                   const int statusCode)
-    : msg(msg),
-    statusCode(statusCode)
+custom_exc::network::ExceptionCreateResponse::ExceptionCreateResponse(const QString & msg,
+                                                                      const qint64 statusCode)
+                                                                      : custom_exc::BaseException(msg, statusCode)
 {}
-QString custom_exc_network::ExceptionCreateRequest::getMsg() noexcept {
-    return this->msg;
-}
-int custom_exc_network::ExceptionCreateRequest::getStatusCode() noexcept {
-    return this->statusCode;
-}
+
+custom_exc::network::ExceptionCreateRequest::ExceptionCreateRequest(const QString & msg,
+                                                                    const qint64 statusCode)
+                                                                    : custom_exc::BaseException(msg, statusCode)
+{}

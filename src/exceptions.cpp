@@ -1,8 +1,8 @@
 #include <exceptions.hpp>
 
-custom_exc::BaseException::BaseException(const QString &messange,
+custom_exc::BaseException::BaseException(const QString &msg,
                                          const quint64 code)
-                                         : msg(messange),
+                                         : msg(msg),
                                            statusCode(code)
 {}
 QString custom_exc::BaseException::getMsg() noexcept
@@ -22,4 +22,9 @@ custom_exc::network::ExceptionCreateResponse::ExceptionCreateResponse(const QStr
 custom_exc::network::ExceptionCreateRequest::ExceptionCreateRequest(const QString & msg,
                                                                     const qint64 statusCode)
                                                                     : custom_exc::BaseException(msg, statusCode)
+{}
+
+custom_exc::database::ExceptionDateBase::ExceptionDateBase(const QString & msg,
+                                                           const quint64 code)
+                                                           : BaseException(msg, code)
 {}

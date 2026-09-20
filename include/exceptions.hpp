@@ -21,10 +21,9 @@
  * @brief Базовое пространство имён для пользовательских исключений.
  *
  * @details Содержит базовый класс исключения и вложенное пространство
- * имён для сетевых исключений.
+ * имён для сетевых исключений
  */
 namespace custom_exc {
-
 /**
  * @class BaseException
  * @brief Базовый класс для всех пользовательских исключений.
@@ -43,7 +42,7 @@ public:
      * @param messange Текстовое описание ошибки
      * @param code Код ошибки
      */
-    BaseException(const QString& messange, const quint64 code);
+    BaseException(const QString& msg, const quint64 code);
 
     /**
      * @brief Возвращает текстовое описание ошибки.
@@ -57,6 +56,14 @@ public:
      */
     qint64 getStatusCode() noexcept;
 };
+namespace database {
+class ExceptionDateBase : public BaseException {
+private:
+public:
+    ExceptionDateBase(const QString & msg,
+                      const quint64 code);
+};
+}
 
 /**
  * @namespace custom_exc::network

@@ -24,6 +24,7 @@ set(SOURCES
     src/database.cpp
 )
 set(HEADERS
+    include/models.hpp
     include/network.hpp
     include/exceptions.hpp
     include/database.hpp

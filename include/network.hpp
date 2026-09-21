@@ -275,32 +275,83 @@ namespace network {
                                  ClientRequestLogOut &request) noexcept;
     }
 
-    class Socket {
+    namespace units {
+        class Socket {
         private:
-        std::atomic<int> numberSocket;
+            std::atomic<int> numberSocket;
 
         public:
-        QMutex socketMutex;
-        Socket(int numSocket);
-        ~Socket();
-        int getSocket() noexcept;
-        bool isZero() noexcept;
-        bool isOne() noexcept;
-        bool isMinusOne() noexcept;
-        bool isLessZero() noexcept;
-        bool isClosed() noexcept;
-        void closeSocket() noexcept;
-    };
-
-    class IClient {
+            QMutex socketMutex;
+            Socket(int numSocket);
+            ~Socket();
+            int getSocket() noexcept;
+            bool isZero() noexcept;
+            bool isOne() noexcept;
+            bool isMinusOne() noexcept;
+            bool isLessZero() noexcept;
+            bool isClosed() noexcept;
+            void closeSocket() noexcept;
+        };
+        class IClient {
         protected:
-        QString name;
-        QString id;
-        bool status;
-    };
-    class ServerThreadAccept : public QThread {
+            bool statusLogIn;
+            QString idUser;
+            QString status;
+
+            virtual void recvLogIn();
+            virtual void sendLogInUserInfo();
+            virtual void recvLogOut();
+            virtual void recvChatsId();
+            virtual void sendChatId();
+            virtual void recvChatInfo();
+            virtual void sendChatInfo();
+            virtual void recvGetMsg();
+            virtual void sendGetMsg();
+            virtual void recvGetFile();
+            virtual void sendGetFile();
+            virtual void recvFileChunk();
+            virtual void sendFileChunk();
+            virtual void recvEndTransaction();
+            virtual void recvPostMsg();
+        public:
+            IClient();
+            QString getId();
+            QString getStatus();
+            bool isLogIn();
+
+            virtual void disconnect();
+            virtual bool isConnected();
+            virtual bool isDisconnected();
+            virtual void sendRequestInitTransaction();
+        };
+        class IChat : public QThread {
+        protected:
+            const QString idChat;
+            network::units::IClient *user1;
+            network::units::IClient *user2;
+            int countMsg;
+            virtual ~IChat() = default;
+        public:
+
+            IChat(const QString & idChat,
+                  network::units::IClient *pUser1,
+                  network::units::IClient *pUser2);
+            QString getIdChat();
+            QString getIdUser1();
+            QString getIdUser2();
+
+            virtual bool isActiveUser1();
+            virtual bool isActiveUser2();
+        };
+    }
+    namespace server {
+        class IServerThreadAccept : public QThread {
+
+        void addNewUSer();
+        void addNewChat();
         private:
-        network::Socket & lserverSocket;
-        ServerThreadAccept(network::Socket & serverSocket);
+        network::units::Socket & lserverSocket;
+            IServerThreadAccept(network::units::Socket & serverSocket);
+        };
     };
 }

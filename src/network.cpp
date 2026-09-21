@@ -400,40 +400,47 @@ QDataStream & network::transmitted_objects::operator>> (QDataStream & in,
     return in;
 }
 
-network::Socket::Socket(int numSocket) : numberSocket(numSocket)
+network::units::Socket::Socket(int numSocket) : numberSocket(numSocket)
 {}
-network::Socket::~Socket() {}
-int network::Socket::getSocket() noexcept {
+network::units::Socket::~Socket() {}
+int network::units::Socket::getSocket() noexcept
+{
     return this->numberSocket.load(std::memory_order_acquire);
 }
-bool network::Socket::isZero() noexcept{
+bool network::units::Socket::isZero() noexcept
+{
     if (this->numberSocket.load(std::memory_order_acquire) == 0) {
         return true;
     }
     return false;
 }
-bool network::Socket::isOne() noexcept{
+bool network::units::Socket::isOne() noexcept
+{
     if (this->numberSocket.load(std::memory_order_acquire) == 1) {
         return true;
     }
     return false;
 }
-bool network::Socket::isLessZero() noexcept {
+bool network::units::Socket::isLessZero() noexcept
+{
     if (this->numberSocket.load(std::memory_order_acquire) < 0) {
         return true;
     }
     return false;
 }
-bool network::Socket::isMinusOne() noexcept {
+bool network::units::Socket::isMinusOne() noexcept
+{
     if (this->numberSocket.load(std::memory_order_acquire) == -1) {
         return true;
     }
     return false;
 }
-bool network::Socket::isClosed() noexcept {
+bool network::units::Socket::isClosed() noexcept
+{
     return this->isMinusOne();
 }
-void network::Socket::closeSocket() noexcept {
+void network::units::Socket::closeSocket() noexcept
+{
     QMutexLocker locker(&this->socketMutex);
     if (this->numberSocket > 0) {
         close(this->numberSocket);

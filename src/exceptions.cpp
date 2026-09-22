@@ -3,7 +3,7 @@
 custom_exc::BaseException::BaseException(const QString &msg,
                                          const quint64 code)
                                          : msg(msg),
-                                           statusCode(code)
+                                           code(code)
 {}
 QString custom_exc::BaseException::getMsg() noexcept
 {
@@ -11,20 +11,25 @@ QString custom_exc::BaseException::getMsg() noexcept
 }
 qint64 custom_exc::BaseException::getStatusCode() noexcept
 {
-    return this->statusCode;
+    return this->code;
 }
 
 custom_exc::network::ExceptionCreateResponse::ExceptionCreateResponse(const QString & msg,
-                                                                      const qint64 statusCode)
-                                                                      : custom_exc::BaseException(msg, statusCode)
+                                                                      const qint64 code)
+                                                                      : custom_exc::BaseException(msg, code)
 {}
 
 custom_exc::network::ExceptionCreateRequest::ExceptionCreateRequest(const QString & msg,
-                                                                    const qint64 statusCode)
-                                                                    : custom_exc::BaseException(msg, statusCode)
+                                                                    const qint64 code)
+                                                                    : custom_exc::BaseException(msg, code)
 {}
 
 custom_exc::database::ExceptionDateBase::ExceptionDateBase(const QString & msg,
                                                            const quint64 code)
                                                            : BaseException(msg, code)
+{}
+
+custom_exc::network::ExceptionServer::ExceptionServer(const QString& msg,
+                                                      const qint64 code)
+                                                      : BaseException(msg, code)
 {}

@@ -50,3 +50,36 @@ install(TARGETS server_process
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
+# tests
+include(FetchContent)
+FetchContent_Declare(
+    googletest
+    URL https://github.com/google/googletest/archive/refs/tags/v1.14.0.zip
+    DOWNLOAD_EXTRACT_TIMESTAMP TRUE
+)
+FetchContent_MakeAvailable(googletest)
+enable_testing()
+
+add_executable(database_tests
+    tests/database_test.cpp
+    src/database.cpp
+    src/exceptions.cpp
+    include/database.hpp
+)
+
+target_include_directories(database_tests
+    PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/include
+        ${CMAKE_CURRENT_SOURCE_DIR}/src
+        ${LIBRARY_PATH}/include
+)
+
+target_link_libraries(database_tests
+    PRIVATE
+        gtest_main
+        Qt${QT_VERSION_MAJOR}::Core
+        Qt${QT_VERSION_MAJOR}::Sql
+)
+include(GoogleTest)
+gtest_discover_tests(database_tests)
+

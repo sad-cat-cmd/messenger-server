@@ -1,14 +1,16 @@
 #ifndef DATABASE_H
 #define DATABASE_H
 
-#include <models.hpp>
-#include <exceptions.hpp>
+#include "models.hpp"
+#include "exceptions.hpp"
 
 #include <QSqlDatabase>
 #include <QSqlQuery>
 #include <QSqlError>
 #include <QString>
 #include <QList>
+#include <QUuid>
+#include <algorithm>
 
 namespace database {
 /**
@@ -266,6 +268,7 @@ namespace database {
 
     class DatabaseManager {
     private:
+        QString connectionName;
         QSqlDatabase db_;
         void createTables();
         void createIndexes();
@@ -273,6 +276,8 @@ namespace database {
     public:
         DatabaseManager(const QString & dbPath);
         void init();
+        QString getConnectionName();
+        QSqlDatabase& getDatabase();
         ~DatabaseManager();
         models::User * addUser(const QString & userId,
                                const QString & username,

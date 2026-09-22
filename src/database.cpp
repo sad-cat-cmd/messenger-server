@@ -50,14 +50,25 @@ void database::DatabaseManager::createIndexes()
 }
 database::DatabaseManager::DatabaseManager(const QString & dbPath)
 {
-    db_ = QSqlDatabase::addDatabase("QSQLITE");
+    this->connectionName = "DatabaseManager_" +
+                           QUuid::createUuid().toString(QUuid::WithoutBraces);
+    db_ = QSqlDatabase::addDatabase("QSQLITE" , this->connectionName);
     db_.setDatabaseName(dbPath);
 }
 database::DatabaseManager::~DatabaseManager() {
     if (db_.isOpen()) {
         db_.close();
     }
-    QSqlDatabase::removeDatabase(QSqlDatabase::defaultConnection);
+    db_ = QSqlDatabase();
+    QSqlDatabase::removeDatabase(this->connectionName);
+}
+QString database::DatabaseManager::getConnectionName()
+{
+    return this->getConnectionName();
+}
+QSqlDatabase& database::DatabaseManager::getDatabase()
+{
+    return this->db_;
 }
 void database::DatabaseManager::init()
 {
@@ -172,33 +183,33 @@ models::User * database::DatabaseManager::getUserByUsername(const QString & user
     }
     return nullptr;
 }
-models::Chat * database::DatabaseManager::addChat (const QString & idChat,
-                                                   const QString & idUser1,
-                                                   const QString & idUser2)
+models::Chat* database::DatabaseManager::addChat(const QString& idChat,
+                                       const QString& idUser1,
+                                       const QString& idUser2)
 {
+    // Сортируем ID: CHECK (id_user_1 < id_user_2)
+    QString u1 = idUser1;
+    QString u2 = idUser2;
+    if (u1 > u2) {
+        std::swap(u1, u2);
+    }
+
     QString msgErr;
     {
         QSqlQuery insertQuery(db_);
         insertQuery.prepare(sqllite_requests::INSERT_CHAT);
         insertQuery.addBindValue(idChat);
-        insertQuery.addBindValue(idUser1);
-        insertQuery.addBindValue(idUser2);
+        insertQuery.addBindValue(u1);   // ← отсортированный
+        insertQuery.addBindValue(u2);   // ← отсортированный
+
         if (!insertQuery.exec()) {
             msgErr = "DatabaseManager::addChat(). INSERT_CHAT failed: "
                      + insertQuery.lastError().text();
             throw custom_exc::database::ExceptionDateBase(msgErr, 7);
         }
-        if (insertQuery.numRowsAffected() == 0) {
-            throw custom_exc::database::ExceptionDateBase(
-                "DatabaseManager::addChat(). No rows inserted", 7);
-        }
     }
-    try {
-        return this->getChatById(idChat);
-    }
-    catch (custom_exc::database::ExceptionDateBase & exc) {
-        throw exc;
-    }
+
+    return this->getChatById(idChat);
 }
 
 models::Chat * database::DatabaseManager::getChatById (const QString & idChat)

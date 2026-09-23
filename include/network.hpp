@@ -5,17 +5,16 @@
 #include <QDataStream>
 #include <QUuid>
 
-// Linux's system network lib
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <unistd.h>
-#include <arpa/inet.h>
+// qt server's header
+#include <QTcpServer>
+#include <QTcpSocket>
 
 // c_plus lib
 #include <atomic>
 
 // my header
 #include <exceptions.hpp>
+#include <database.hpp>
 
 namespace network {
 
@@ -345,13 +344,31 @@ namespace network {
         };
     }
     namespace server {
-        class IServerThreadAccept : public QThread {
-
-        void addNewUSer();
-        void addNewChat();
+        quint64 MIN_AVAIBLE_NUMBER_PORT = 1024;
+        quint64 MAX_AVAIBLE_NUMBER_PORT = 49152;
+        class IServerMessager {
         private:
-        network::units::Socket & lserverSocket;
-            IServerThreadAccept(network::units::Socket & serverSocket);
+            quint64 numberPort;
+            quint64 maxCountClients;
+            QString dbPath;
+        protected:
+            virtual void addNewClient() = 0;
+            virtual void addNewChat() = 0;
+        public:
+            quint64 getPort() noexcept;
+            quint64 getMaxCountClient() noexcept;
+            QString getDbPath() noexcept;
+
+            IServerMessager(const quint64 port,
+                            const quint64 maxCountClients,
+                            const QString & dbPath);
+        };
+
+        class RTcpLocalServerMessager {
+            private:
+            database::DatabaseManager * dataBaseManager;
+            QList<units::IClient *> onlineClients;
+            QList<units::IChat *> activeChats;
         };
     };
 }

@@ -439,14 +439,49 @@ bool network::units::Socket::isClosed() noexcept
 {
     return this->isMinusOne();
 }
-void network::units::Socket::closeSocket() noexcept
+// void network::units::Socket::closeSocket() noexcept
+// {
+//     QMutexLocker locker(&this->socketMutex);
+//     if (this->numberSocket > 0) {
+//         close(this->numberSocket);
+//         this->numberSocket = -1;
+//     }
+// }
+
+network::server::IServerMessager::IServerMessager(const quint64 port,
+                                                  const quint64 maxCountClients,
+                                                  const QString & dbPath)
+                                                  : numberPort(port),
+                                                    maxCountClients(maxCountClients),
+                                                    dbPath(dbPath)
 {
-    QMutexLocker locker(&this->socketMutex);
-    if (this->numberSocket > 0) {
-        close(this->numberSocket);
-        this->numberSocket = -1;
+    if (this->numberPort < MIN_AVAIBLE_NUMBER_PORT || this->numberPort > MAX_AVAIBLE_NUMBER_PORT) {
+        throw custom_exc::network::ExceptionServer(QString("IServerMessager(). Param numberPort is more or less normal value (MIN_AVAIBLE_NUMBER_PORT-MAX_AVAIBLE_NUMBER_PORT)."),
+                                                   1);
+    }
+    if (this->maxCountClients <= 0) {
+        throw custom_exc::network::ExceptionServer(QString("IServerMessager(). Param maxCountClients is equils or less 0"),
+                                                   1);
+    }
+    if (this->dbPath.isEmpty()) {
+        throw custom_exc::network::ExceptionServer(QString("IServerMessager(). Param dbPath is empty"),
+                                                   1);
     }
 }
+quint64 network::server::IServerMessager::getPort() noexcept
+{
+    return this->numberPort;
+}
+quint64 network::server::IServerMessager::getMaxCountClient() noexcept
+{
+    return this->maxCountClients;
+}
+QString network::server::IServerMessager::getDbPath() noexcept
+{
+    return this->dbPath;
+}
+
+
 
 
 

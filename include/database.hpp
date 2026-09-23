@@ -117,6 +117,7 @@ namespace database {
                             is_file INTEGER NOT NULL DEFAULT 0,
                             CHECK (is_file IN (1, 0)),
                             CHECK (is_readed IN (0, 1)),
+                            CHECK (number_msg >= 0),
                             CHECK ((LENGTH(text_msg) >= 1 AND LENGTH(text_msg) <= 1000 AND is_file == 0) OR (LENGTH(text_msg) >= 1 AND LENGTH(text_msg) <= 255 AND is_file == 1)),
                             FOREIGN KEY (id_parent_chat) REFERENCES chats(id) ON DELETE CASCADE,
                             FOREIGN KEY (owner) REFERENCES users(id) ON DELETE CASCADE,
@@ -246,9 +247,16 @@ namespace database {
                      */
         const QString SELECT_CHAT_BY_ID =
             "SELECT * FROM chats WHERE id = ?";
-
+        /**
+                     * @brief Выборка сообщения по ID.
+                     * @details Параметры: id.
+                     */
         const QString SELECT_MSG_BY_ID =
             "SELECT * FROM messages WHERE id = ?";
+
+        const QString SELECT_MSGS_BY_ID_CHAT_AND_INDEX_FROM =
+            "SELECT * FROM messages WHERE id_parent_chat = ? AND number_msg >= ?";
+
         // ==================== UPDATE ====================
 
         /**
@@ -304,8 +312,10 @@ namespace database {
                                   const quint64 numMsg,
                                   const bool flagFile);
         models::Message * getMsgById (const QString idMsg);
-        models::Message * setMsgIsReaded (const QString &idMsg);
         QList<models::Message *> getAllMsgsByChatId (const QString & chatId);
+        QList<models::Message *> getMsgsByChatIdIndexFrom (const QString & chatId,
+                                                           const quint64 beginIndex);
+        models::Message * setMsgIsReaded (const QString &idMsg);
 
         models::File * addMsgFile (const QString & idFile,
                                    const QString & localPath,

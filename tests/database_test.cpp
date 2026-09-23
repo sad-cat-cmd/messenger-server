@@ -458,3 +458,92 @@ TEST_F(DatabaseFileTest, EmptyTextThrows) {
         custom_exc::database::ExceptionDateBase
         );
 }
+// ==================== ТЕСТ 18: GetMsgsByChatIdIndexFrom ====================
+
+TEST_F(DatabaseFileTest, GetMsgsByChatIdIndexFrom_Success) {
+    // 1. Пользователи
+    auto* u1 = manager->addUser("user-a", "User A", "hash_a");
+    auto* u2 = manager->addUser("user-b", "User B", "hash_b");
+    delete u1;
+    delete u2;
+
+    // 2. Чат
+    auto* chat = manager->addChat("chat-1", "user-a", "user-b");
+    delete chat;
+
+    // 3. Создаём 5 сообщений с number_msg = 1, 2, 3, 4, 5
+    for (int i = 1; i <= 5; ++i) {
+        delete manager->addMsg(
+            QString("msg-%1").arg(i),
+            "chat-1", "user-a", "user-b",
+            QString("Message %1").arg(i),
+            i,          // number_msg
+            false
+            );
+    }
+
+    // 4. Получаем сообщения начиная с number_msg = 3
+    auto msgs = manager->getMsgsByChatIdIndexFrom("chat-1", 3);
+
+    // 5. Проверяем: должно быть 3 сообщения (3, 4, 5)
+    ASSERT_EQ(msgs.size(), 3);
+    EXPECT_EQ(msgs[0]->numberMsg, 3);
+    EXPECT_EQ(msgs[1]->numberMsg, 4);
+    EXPECT_EQ(msgs[2]->numberMsg, 5);
+    EXPECT_EQ(msgs[0]->text_msg.toStdString(), "Message 3");
+    EXPECT_EQ(msgs[2]->text_msg.toStdString(), "Message 5");
+
+    for (auto* msg : msgs) delete msg;
+}
+// ==================== ТЕСТ 19: GetMsgsByChatIdIndexFrom с 0 ====================
+
+TEST_F(DatabaseFileTest, GetMsgsByChatIdIndexFrom_FromZero) {
+    // 1. Пользователи и чат
+    auto* u1 = manager->addUser("user-a", "User A", "hash_a");
+    auto* u2 = manager->addUser("user-b", "User B", "hash_b");
+    delete u1;
+    delete u2;
+    auto* chat = manager->addChat("chat-1", "user-a", "user-b");
+    delete chat;
+
+    // 2. Три сообщения
+    delete manager->addMsg("msg-1", "chat-1", "user-a", "user-b", "First",  1, false);
+    delete manager->addMsg("msg-2", "chat-1", "user-a", "user-b", "Second", 2, false);
+    delete manager->addMsg("msg-3", "chat-1", "user-a", "user-b", "Third",  3, false);
+
+    // 3. Получаем с 0 — должны получить все 3
+    auto msgs = manager->getMsgsByChatIdIndexFrom("chat-1", 0);
+
+    ASSERT_EQ(msgs.size(), 3);
+    EXPECT_EQ(msgs[0]->numberMsg, 1);
+    EXPECT_EQ(msgs[1]->numberMsg, 2);
+    EXPECT_EQ(msgs[2]->numberMsg, 3);
+
+    for (auto* msg : msgs) delete msg;
+}
+// ==================== ТЕСТ 20: GetMsgsByChatIdIndexFrom — пустой результат ====================
+
+TEST_F(DatabaseFileTest, GetMsgsByChatIdIndexFrom_EmptyResult) {
+    // 1. Пользователи и чат
+    auto* u1 = manager->addUser("user-a", "User A", "hash_a");
+    auto* u2 = manager->addUser("user-b", "User B", "hash_b");
+    delete u1;
+    delete u2;
+    auto* chat = manager->addChat("chat-1", "user-a", "user-b");
+    delete chat;
+
+    // 2. Два сообщения (number_msg = 1, 2)
+    delete manager->addMsg("msg-1", "chat-1", "user-a", "user-b", "First",  1, false);
+    delete manager->addMsg("msg-2", "chat-1", "user-a", "user-b", "Second", 2, false);
+
+    // 3. Запрашиваем с 10 — ничего нет
+    auto msgs = manager->getMsgsByChatIdIndexFrom("chat-1", 10);
+
+    EXPECT_EQ(msgs.size(), 0);
+}
+// ==================== ТЕСТ 21: GetMsgsByChatIdIndexFrom — неверный чат ====================
+
+TEST_F(DatabaseFileTest, GetMsgsByChatIdIndexFrom_WrongChat) {
+    auto msgs = manager->getMsgsByChatIdIndexFrom("non-existent-chat", 0);
+    EXPECT_EQ(msgs.size(), 0);
+}

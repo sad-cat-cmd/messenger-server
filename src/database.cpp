@@ -354,31 +354,6 @@ models::Message * database::DatabaseManager::getMsgById (const QString idMsg)
     }
     return nullptr;
 }
-models::Message * database::DatabaseManager::setMsgIsReaded (const QString &idMsg)
-{
-    QString msgErr;
-    {
-        QSqlQuery updateQuery(db_);
-        updateQuery.prepare(sqllite_requests::UPDATE_MSG_IS_READED);
-        updateQuery.addBindValue(idMsg);
-
-        if (!updateQuery.exec()) {
-            msgErr = "DatabaseManager::setMsgIsReaded(). UPDATE_MSG_IS_READED failed: "
-                     + updateQuery.lastError().text();
-            throw custom_exc::database::ExceptionDateBase(msgErr, 10);
-        }
-        if (updateQuery.numRowsAffected() == 0) {
-            throw custom_exc::database::ExceptionDateBase(
-                "DatabaseManager::setMsgIsReaded(). No rows inserted", 10);
-        }
-    }
-    try {
-        return this->getMsgById(idMsg);
-    }
-    catch (custom_exc::database::ExceptionDateBase & exc) {
-        throw exc;
-    }
-}
 QList<models::Message *> database::DatabaseManager::getAllMsgsByChatId (const QString & chatId)
 {
     QString msgErr;
@@ -407,6 +382,62 @@ QList<models::Message *> database::DatabaseManager::getAllMsgsByChatId (const QS
         }
     }
     return msgs;
+}
+QList<models::Message *> database::DatabaseManager::getMsgsByChatIdIndexFrom (const QString & chatId,
+                                                                              const quint64 beginIndex)
+{
+    QString msgErr;
+    QList<models::Message *> msgs = QList<models::Message *>();
+    {
+        QSqlQuery selectQuery(db_);
+        selectQuery.prepare(sqllite_requests::SELECT_MSGS_BY_ID_CHAT_AND_INDEX_FROM);
+        selectQuery.addBindValue(chatId);
+        selectQuery.addBindValue(beginIndex);
+        if (!selectQuery.exec()) {
+            msgErr = "DatabaseManager::getMsgsByChatIdIndexFrom(). SELECT_MSGS_BY_ID_CHAT_AND_INDEX_FROM failed: "
+                     + selectQuery.lastError().text();
+            throw custom_exc::database::ExceptionDateBase(msgErr, 15);
+        }
+        while (selectQuery.next()) {
+            models::Message * pMsg = new models::Message;
+            pMsg->id           = selectQuery.value("id").toString();
+            pMsg->idParentChat     = selectQuery.value("id_parent_chat").toString();
+            pMsg->createdAt     = selectQuery.value("created_at").toDateTime();
+            pMsg->owner = selectQuery.value("owner").toString();
+            pMsg->receiver    = selectQuery.value("receiver").toString();
+            pMsg->text_msg = selectQuery.value("text_msg").toString();
+            pMsg->numberMsg = selectQuery.value("number_msg").toString().toLongLong();
+            pMsg->isReaded = selectQuery.value("is_readed").toString().toInt();
+            pMsg->isFile = selectQuery.value("is_file").toString().toInt();
+            msgs.push_back(pMsg);
+        }
+    }
+    return msgs;
+}
+models::Message * database::DatabaseManager::setMsgIsReaded (const QString &idMsg)
+{
+    QString msgErr;
+    {
+        QSqlQuery updateQuery(db_);
+        updateQuery.prepare(sqllite_requests::UPDATE_MSG_IS_READED);
+        updateQuery.addBindValue(idMsg);
+
+        if (!updateQuery.exec()) {
+            msgErr = "DatabaseManager::setMsgIsReaded(). UPDATE_MSG_IS_READED failed: "
+                     + updateQuery.lastError().text();
+            throw custom_exc::database::ExceptionDateBase(msgErr, 10);
+        }
+        if (updateQuery.numRowsAffected() == 0) {
+            throw custom_exc::database::ExceptionDateBase(
+                "DatabaseManager::setMsgIsReaded(). No rows inserted", 10);
+        }
+    }
+    try {
+        return this->getMsgById(idMsg);
+    }
+    catch (custom_exc::database::ExceptionDateBase & exc) {
+        throw exc;
+    }
 }
 
 models::File * database::DatabaseManager::addMsgFile (const QString & idFile,

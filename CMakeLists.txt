@@ -20,12 +20,14 @@ set(SOURCES
     src/network.cpp
     src/exceptions.cpp
     src/database.cpp
+    src/out.cpp
 )
 set(HEADERS
     include/models.hpp
     include/network.hpp
     include/exceptions.hpp
     include/database.hpp
+    include/out.hpp
 )
 add_executable(server_process
    ${SOURCES} ${HEADERS}

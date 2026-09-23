@@ -288,10 +288,11 @@ models::Chat * database::DatabaseManager::setCountMsgInChatByChatId (const QStri
         throw exc;
     }
 }
-models::Message * database::DatabaseManager::addMsg (const QString &idMsg,
-                                                     const QString idChat,
-                                                     const QString idOwner,
-                                                     const QString idReceiver,
+models::Message * database::DatabaseManager::addMsg (const QString & idMsg,
+                                                     const QString & idChat,
+                                                     const QString & idOwner,
+                                                     const QString & idReceiver,
+                                                     const QString & textMsg,
                                                      const quint64 numMsg,
                                                      const bool flagFile)
 {
@@ -303,8 +304,8 @@ models::Message * database::DatabaseManager::addMsg (const QString &idMsg,
         insertQuery.addBindValue(idChat);
         insertQuery.addBindValue(idOwner);
         insertQuery.addBindValue(idReceiver);
+        insertQuery.addBindValue(textMsg);
         insertQuery.addBindValue(numMsg);
-        insertQuery.addBindValue(0);
         insertQuery.addBindValue(flagFile ? 1 : 0);
         if (!insertQuery.exec()) {
             msgErr = "DatabaseManager::addMsg(). INSERT_MSG failed: "
@@ -344,6 +345,7 @@ models::Message * database::DatabaseManager::getMsgById (const QString idMsg)
             pMsg->createdAt     = selectQuery.value("created_at").toDateTime();
             pMsg->owner = selectQuery.value("owner").toString();
             pMsg->receiver    = selectQuery.value("receiver").toString();
+            pMsg->text_msg = selectQuery.value("text_msg").toString();
             pMsg->numberMsg = selectQuery.value("number_msg").toString().toLongLong();
             pMsg->isReaded = selectQuery.value("is_readed").toInt();
             pMsg->isFile = selectQuery.value("is_file").toInt();
@@ -397,6 +399,7 @@ QList<models::Message *> database::DatabaseManager::getAllMsgsByChatId (const QS
             pMsg->createdAt     = selectQuery.value("created_at").toDateTime();
             pMsg->owner = selectQuery.value("owner").toString();
             pMsg->receiver    = selectQuery.value("receiver").toString();
+            pMsg->text_msg = selectQuery.value("text_msg").toString();
             pMsg->numberMsg = selectQuery.value("number_msg").toString().toLongLong();
             pMsg->isReaded = selectQuery.value("is_readed").toString().toInt();
             pMsg->isFile = selectQuery.value("is_file").toString().toInt();
@@ -412,6 +415,7 @@ models::File * database::DatabaseManager::addMsgFile (const QString & idFile,
                                                       const QString & idChat,
                                                       const QString & idOwner,
                                                       const QString & idReceiver,
+                                                      const QString & textMsg,
                                                       const quint64 numMsg)
 {
     QString msgErr;
@@ -422,6 +426,7 @@ models::File * database::DatabaseManager::addMsgFile (const QString & idFile,
                          idChat,
                          idOwner,
                          idReceiver,
+                         textMsg,
                          numMsg,
                          true);
         }

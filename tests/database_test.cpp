@@ -139,40 +139,83 @@ TEST_F(DatabaseFileTest, ForeignKeysAreEnabled) {
         << "Foreign keys are NOT enabled!";
 }
 
-// ==================== ТЕСТ 7: ON DELETE CASCADE работает ====================
+// // ==================== ТЕСТ 7: ON DELETE CASCADE работает ====================
+
+// TEST_F(DatabaseFileTest, DeleteCascadeWorks) {
+//     // 1. Создаём двух пользователей
+//     auto* u1 = manager->addUser("u1", "user1", "hash1");
+//     auto* u2 = manager->addUser("u2", "user2", "hash2");
+//     ASSERT_NE(u1, nullptr);
+//     ASSERT_NE(u2, nullptr);
+//     delete u1;
+//     delete u2;
+
+//     // 2. Создаём чат
+//     auto* chat = manager->addChat("chat-1", "u1", "u2");
+//     ASSERT_NE(chat, nullptr);
+//     delete chat;
+
+//     // 3. Удаляем одного пользователя
+//     QSqlDatabase db = manager->getDatabase();
+//     QSqlQuery deleteUser(db);
+//     deleteUser.prepare("DELETE FROM users WHERE id = ?");
+//     deleteUser.addBindValue("u1");
+//     ASSERT_TRUE(deleteUser.exec());
+
+//     // 4. Проверяем, что чат удалился каскадно
+//     QSqlQuery checkChat(db);
+//     checkChat.prepare("SELECT COUNT(*) FROM chats WHERE id = ?");
+//     checkChat.addBindValue("chat-1");
+//     ASSERT_TRUE(checkChat.exec());
+//     ASSERT_TRUE(checkChat.next());
+
+//     EXPECT_EQ(checkChat.value(0).toInt(), 0)
+//         << "ON DELETE CASCADE did not work!";
+// }
+
+// ==================== ТЕСТ 7 (обновлён): CASCADE удаляет чат И сообщения ====================
 
 TEST_F(DatabaseFileTest, DeleteCascadeWorks) {
-    // 1. Создаём двух пользователей
+    // 1. Создаём пользователей
     auto* u1 = manager->addUser("u1", "user1", "hash1");
     auto* u2 = manager->addUser("u2", "user2", "hash2");
-    ASSERT_NE(u1, nullptr);
-    ASSERT_NE(u2, nullptr);
     delete u1;
     delete u2;
 
     // 2. Создаём чат
     auto* chat = manager->addChat("chat-1", "u1", "u2");
-    ASSERT_NE(chat, nullptr);
     delete chat;
 
-    // 3. Удаляем одного пользователя
+    // 3. Добавляем сообщение
+    auto* msg = manager->addMsg("msg-1", "chat-1", "u1", "u2",
+                                "Hello", 1, false);
+    delete msg;
+
+    // 4. Удаляем пользователя u1
     QSqlDatabase db = manager->getDatabase();
     QSqlQuery deleteUser(db);
     deleteUser.prepare("DELETE FROM users WHERE id = ?");
     deleteUser.addBindValue("u1");
     ASSERT_TRUE(deleteUser.exec());
 
-    // 4. Проверяем, что чат удалился каскадно
+    // 5. Проверяем: чат удалён
     QSqlQuery checkChat(db);
     checkChat.prepare("SELECT COUNT(*) FROM chats WHERE id = ?");
     checkChat.addBindValue("chat-1");
     ASSERT_TRUE(checkChat.exec());
     ASSERT_TRUE(checkChat.next());
-
     EXPECT_EQ(checkChat.value(0).toInt(), 0)
-        << "ON DELETE CASCADE did not work!";
-}
+        << "Chat was not deleted by CASCADE";
 
+    // 6. Проверяем: сообщение удалено (CASCADE через chat)
+    QSqlQuery checkMsg(db);
+    checkMsg.prepare("SELECT COUNT(*) FROM messages WHERE id = ?");
+    checkMsg.addBindValue("msg-1");
+    ASSERT_TRUE(checkMsg.exec());
+    ASSERT_TRUE(checkMsg.next());
+    EXPECT_EQ(checkMsg.value(0).toInt(), 0)
+        << "Message was not deleted by CASCADE";
+}
 // ==================== ТЕСТ 8: AddChat с сортировкой ====================
 
 TEST_F(DatabaseFileTest, AddChatSortsUserIds) {
@@ -224,4 +267,194 @@ TEST_F(DatabaseFileTest, TransactionRollback) {
     auto* fetched = manager->getUserById("tx-user-1");
     EXPECT_EQ(fetched, nullptr) << "Rollback did not work";
     delete fetched;
+}
+// ==================== ТЕСТ 11: AddMsg с текстом ====================
+
+TEST_F(DatabaseFileTest, AddTextMessage) {
+    // 1. Создаём пользователей (нужны для FK)
+    auto* u1 = manager->addUser("user-a", "User A", "hash_a");
+    auto* u2 = manager->addUser("user-b", "User B", "hash_b");
+    ASSERT_NE(u1, nullptr);
+    ASSERT_NE(u2, nullptr);
+    delete u1;
+    delete u2;
+
+    // 2. Создаём чат
+    auto* chat = manager->addChat("chat-1", "user-a", "user-b");
+    ASSERT_NE(chat, nullptr);
+    delete chat;
+
+    // 3. Создаём текстовое сообщение
+    auto* msg = manager->addMsg(
+        "msg-1",                    // idMsg
+        "chat-1",                   // idChat
+        "user-a",                   // idOwner
+        "user-b",                   // idReceiver
+        "Hello, world!",            // textMsg ← НОВОЕ
+        1,                          // numMsg
+        false                       // is_file = 0 (текст)
+        );
+
+    ASSERT_NE(msg, nullptr) << "addMsg returned nullptr";
+    EXPECT_EQ(msg->id.toStdString(), "msg-1");
+    EXPECT_EQ(msg->text_msg.toStdString(), "Hello, world!");
+    EXPECT_EQ(msg->isFile, false);
+    EXPECT_EQ(msg->numberMsg, 1);
+
+    delete msg;
+}
+// ==================== ТЕСТ 12: AddMsg с файлом ====================
+
+TEST_F(DatabaseFileTest, AddFileMessage) {
+    // 1. Создаём пользователей
+    auto* u1 = manager->addUser("user-a", "User A", "hash_a");
+    auto* u2 = manager->addUser("user-b", "User B", "hash_b");
+    delete u1;
+    delete u2;
+
+    // 2. Создаём чат
+    auto* chat = manager->addChat("chat-1", "user-a", "user-b");
+    delete chat;
+
+    // 3. Создаём сообщение-файл
+    auto* msg = manager->addMsg(
+        "msg-file-1",
+        "chat-1",
+        "user-a",
+        "user-b",
+        "document.pdf",             // textMsg = имя файла
+        1,
+        true                        // is_file = 1
+        );
+
+    ASSERT_NE(msg, nullptr);
+    EXPECT_EQ(msg->text_msg.toStdString(), "document.pdf");
+    EXPECT_EQ(msg->isFile, true);
+
+    delete msg;
+}
+// ==================== ТЕСТ 13: GetAllMsgsByChatId ====================
+
+TEST_F(DatabaseFileTest, GetAllMsgsByChatId) {
+    // 1. Пользователи
+    auto* u1 = manager->addUser("user-a", "User A", "hash_a");
+    auto* u2 = manager->addUser("user-b", "User B", "hash_b");
+    delete u1;
+    delete u2;
+
+    // 2. Чат
+    auto* chat = manager->addChat("chat-1", "user-a", "user-b");
+    delete chat;
+
+    // 3. Три сообщения: текст, текст, файл
+    delete manager->addMsg("msg-1", "chat-1", "user-a", "user-b", "First",  1, false);
+    delete manager->addMsg("msg-2", "chat-1", "user-b", "user-a", "Second", 2, false);
+    delete manager->addMsg("msg-3", "chat-1", "user-a", "user-b", "file.zip", 3, true);
+
+    // 4. Получаем все
+    auto messages = manager->getAllMsgsByChatId("chat-1");
+
+    ASSERT_EQ(messages.size(), 3);
+
+    // Проверяем порядок (по number_msg)
+    EXPECT_EQ(messages[0]->text_msg.toStdString(), "First");
+    EXPECT_EQ(messages[1]->text_msg.toStdString(), "Second");
+    EXPECT_EQ(messages[2]->text_msg.toStdString(), "file.zip");
+    EXPECT_TRUE(messages[2]->isFile);
+
+    // Освобождаем память
+    for (auto* msg : messages) {
+        delete msg;
+    }
+}
+// ==================== ТЕСТ 14: Сообщение слишком длинное ====================
+
+TEST_F(DatabaseFileTest, MessageTooLongThrows) {
+    // 1. Пользователи и чат
+    auto* u1 = manager->addUser("user-a", "User A", "hash_a");
+    auto* u2 = manager->addUser("user-b", "User B", "hash_b");
+    delete u1;
+    delete u2;
+    auto* chat = manager->addChat("chat-1", "user-a", "user-b");
+    delete chat;
+
+    // 2. Слишком длинный текст (1001 символ)
+    QString longText(1001, 'A');
+
+    // 3. Ожидаем исключение из-за CHECK constraint
+    EXPECT_THROW(
+        manager->addMsg("msg-too-long", "chat-1", "user-a", "user-b",
+                        longText, 1, false),
+        custom_exc::database::ExceptionDateBase
+        );
+}
+// ==================== ТЕСТ 15: Имя файла слишком длинное ====================
+
+TEST_F(DatabaseFileTest, FileNameTooLongThrows) {
+    // 1. Пользователи и чат
+    auto* u1 = manager->addUser("user-a", "User A", "hash_a");
+    auto* u2 = manager->addUser("user-b", "User B", "hash_b");
+    delete u1;
+    delete u2;
+    auto* chat = manager->addChat("chat-1", "user-a", "user-b");
+    delete chat;
+
+    // 2. Слишком длинное имя файла (256 символов)
+    QString longFileName(256, 'f');
+
+    // 3. Ожидаем исключение
+    EXPECT_THROW(
+        manager->addMsg("msg-file-long", "chat-1", "user-a", "user-b",
+                        longFileName, 1, true),   // is_file = 1
+        custom_exc::database::ExceptionDateBase
+        );
+}
+// ==================== ТЕСТ 16: Граничные длины ====================
+
+TEST_F(DatabaseFileTest, MessageBoundaryLengths) {
+    // 1. Пользователи и чат
+    auto* u1 = manager->addUser("user-a", "User A", "hash_a");
+    auto* u2 = manager->addUser("user-b", "User B", "hash_b");
+    delete u1;
+    delete u2;
+    auto* chat = manager->addChat("chat-1", "user-a", "user-b");
+    delete chat;
+
+    // 2. Текстовое сообщение: 1 символ (минимум)
+    auto* msg1 = manager->addMsg("msg-min", "chat-1", "user-a", "user-b",
+                                 "A", 1, false);
+    EXPECT_NE(msg1, nullptr);
+    delete msg1;
+
+    // 3. Текстовое сообщение: 1000 символов (максимум)
+    QString maxText(1000, 'X');
+    auto* msg2 = manager->addMsg("msg-max", "chat-1", "user-a", "user-b",
+                                 maxText, 2, false);
+    EXPECT_NE(msg2, nullptr);
+    delete msg2;
+
+    // 4. Имя файла: 255 символов (максимум)
+    QString maxFile(255, 'f');
+    auto* msg3 = manager->addMsg("msg-file-max", "chat-1", "user-a", "user-b",
+                                 maxFile, 3, true);
+    EXPECT_NE(msg3, nullptr);
+    delete msg3;
+}
+// ==================== ТЕСТ 17: Пустой текст ====================
+
+TEST_F(DatabaseFileTest, EmptyTextThrows) {
+    // 1. Пользователи и чат
+    auto* u1 = manager->addUser("user-a", "User A", "hash_a");
+    auto* u2 = manager->addUser("user-b", "User B", "hash_b");
+    delete u1;
+    delete u2;
+    auto* chat = manager->addChat("chat-1", "user-a", "user-b");
+    delete chat;
+
+    // 2. Пустой текст → CHECK (LENGTH >= 1) отклонит
+    EXPECT_THROW(
+        manager->addMsg("msg-empty", "chat-1", "user-a", "user-b",
+                        "", 1, false),
+        custom_exc::database::ExceptionDateBase
+        );
 }

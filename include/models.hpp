@@ -39,6 +39,7 @@ struct Message {
     QDateTime createdAt;    ///< Дата создания
     QString owner;          ///< ID отправителя
     QString receiver;       ///< ID получателя
+    QString text_msg;       ///< текст сообщения
     qint64 numberMsg;       ///< Порядковый номер
     bool isReaded;          ///< Прочитано?
     bool isFile;            ///< Это файл?

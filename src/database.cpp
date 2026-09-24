@@ -64,7 +64,7 @@ database::DatabaseManager::~DatabaseManager() {
 }
 QString database::DatabaseManager::getConnectionName()
 {
-    return this->getConnectionName();
+    return this->connectionName;
 }
 QSqlDatabase& database::DatabaseManager::getDatabase()
 {
@@ -92,6 +92,7 @@ models::User* database::DatabaseManager::addUser(const QString& userId,
                                                  const QString& username,
                                                  const QString& password)
 {
+    QMutexLocker locker(&mutex);
     QString msgErr;
     {
         QSqlQuery selectQuery(db_);
@@ -133,6 +134,7 @@ models::User* database::DatabaseManager::addUser(const QString& userId,
 }
 models::User * database::DatabaseManager::getUserById(const QString & userId)
 {
+    QMutexLocker locker(&mutex);
     QString msgErr;
     {
         QSqlQuery selectQuery(db_);
@@ -159,6 +161,7 @@ models::User * database::DatabaseManager::getUserById(const QString & userId)
 }
 models::User * database::DatabaseManager::getUserByUsername(const QString & username)
 {
+    QMutexLocker locker(&mutex);
     QString msgErr;
     {
         QSqlQuery selectQuery(db_);
@@ -184,9 +187,10 @@ models::User * database::DatabaseManager::getUserByUsername(const QString & user
     return nullptr;
 }
 models::Chat* database::DatabaseManager::addChat(const QString& idChat,
-                                       const QString& idUser1,
-                                       const QString& idUser2)
+                                                 const QString& idUser1,
+                                                 const QString& idUser2)
 {
+    QMutexLocker locker(&mutex);
     // Сортируем ID: CHECK (id_user_1 < id_user_2)
     QString u1 = idUser1;
     QString u2 = idUser2;
@@ -214,6 +218,7 @@ models::Chat* database::DatabaseManager::addChat(const QString& idChat,
 
 models::Chat * database::DatabaseManager::getChatById (const QString & idChat)
 {
+    QMutexLocker locker(&mutex);
     QString msgErr;
     {
         QSqlQuery selectQuery(db_);
@@ -239,6 +244,7 @@ models::Chat * database::DatabaseManager::getChatById (const QString & idChat)
 }
 QList<models::Chat *> database::DatabaseManager::getAllChatsByUserId (const QString & userId)
 {
+    QMutexLocker locker(&mutex);
     QString msgErr;
     QList<models::Chat *> chats = QList<models::Chat *>();
     {
@@ -264,6 +270,7 @@ QList<models::Chat *> database::DatabaseManager::getAllChatsByUserId (const QStr
 models::Chat * database::DatabaseManager::setCountMsgInChatByChatId (const QString & idChat,
                                                                      const quint64 newCount)
 {
+    QMutexLocker locker(&mutex);
     QString msgErr;
     {
         QSqlQuery updateQuery(db_);
@@ -297,6 +304,7 @@ models::Message * database::DatabaseManager::addMsg (const QString & idMsg,
                                                      const bool flagFile,
                                                      const quint64 sizeFile)
 {
+    QMutexLocker locker(&mutex);
     QString msgErr;
     {
         QSqlQuery insertQuery(db_);
@@ -328,6 +336,7 @@ models::Message * database::DatabaseManager::addMsg (const QString & idMsg,
 }
 models::Message * database::DatabaseManager::getMsgById (const QString idMsg)
 {
+    QMutexLocker locker(&mutex);
     QString msgErr;
     {
         QSqlQuery selectQuery(db_);
@@ -359,6 +368,7 @@ models::Message * database::DatabaseManager::getMsgById (const QString idMsg)
 }
 QList<models::Message *> database::DatabaseManager::getAllMsgsByChatId (const QString & chatId)
 {
+    QMutexLocker locker(&mutex);
     QString msgErr;
     QList<models::Message *> msgs = QList<models::Message *>();
     {
@@ -390,6 +400,7 @@ QList<models::Message *> database::DatabaseManager::getAllMsgsByChatId (const QS
 QList<models::Message *> database::DatabaseManager::getMsgsByChatIdIndexFrom (const QString & chatId,
                                                                               const quint64 beginIndex)
 {
+    QMutexLocker locker(&mutex);
     QString msgErr;
     QList<models::Message *> msgs = QList<models::Message *>();
     {
@@ -421,6 +432,7 @@ QList<models::Message *> database::DatabaseManager::getMsgsByChatIdIndexFrom (co
 }
 models::Message * database::DatabaseManager::setMsgIsReaded (const QString &idMsg)
 {
+    QMutexLocker locker(&mutex);
     QString msgErr;
     {
         QSqlQuery updateQuery(db_);
@@ -455,6 +467,7 @@ models::File * database::DatabaseManager::addMsgFile (const QString & idFile,
                                                       const quint64 numMsg,
                                                       const quint64 sizeFile)
 {
+    QMutexLocker locker(&mutex);
     QString msgErr;
 
     {
@@ -496,7 +509,7 @@ models::File * database::DatabaseManager::addMsgFile (const QString & idFile,
 
 models::File * database::DatabaseManager::getFileByMsgId (const QString &idMsg)
 {
-
+    QMutexLocker locker(&mutex);
     QString msgErr;
     {
         QSqlQuery selectQuery(db_);

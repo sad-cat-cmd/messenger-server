@@ -4,6 +4,7 @@
 #include <QDir>
 #include <QTemporaryDir>
 #include <memory>
+#include <thread>
 #include "database.hpp"
 #include "models.hpp"
 
@@ -564,6 +565,42 @@ TEST_F(DatabaseTest, GetMsgByIdPreservesSizeFile) {
     EXPECT_EQ(fetched->isFile, true);
     EXPECT_EQ(fetched->sizeFile, fileSize);
     delete fetched;
+}
+
+// ==================== ТЕСТ 26: Проверка thread multy work безопаскности ====================
+TEST_F(DatabaseTest, ConcurrentAddMessages) {
+    // Создаём пользователей и чат
+    auto* u1 = manager->addUser("user-a", "User A", "hash_a");
+    auto* u2 = manager->addUser("user-b", "User B", "hash_b");
+    delete u1; delete u2;
+    auto* chat = manager->addChat("chat-1", "user-a", "user-b");
+    delete chat;
+
+    // Запускаем 10 потоков, каждый добавляет 10 сообщений
+    const int THREADS = 10;
+    const int MSGS_PER_THREAD = 10;
+
+    std::vector<std::thread> threads;
+    for (int t = 0; t < THREADS; ++t) {
+        threads.emplace_back([&, t]() {
+            for (int i = 0; i < MSGS_PER_THREAD; ++i) {
+                QString idMsg = QString("msg-%1-%2").arg(t).arg(i);
+                manager->addMsg(idMsg, "chat-1", "user-a", "user-b",
+                                QString("Message %1").arg(i),
+                                i, false, 0);
+            }
+        });
+    }
+
+    for (auto& t : threads) {
+        t.join();
+    }
+
+    // Проверяем, что все сообщения добавлены
+    auto msgs = manager->getAllMsgsByChatId("chat-1");
+    EXPECT_EQ(msgs.size(), THREADS * MSGS_PER_THREAD);
+
+    for (auto* msg : msgs) delete msg;
 }
 
 

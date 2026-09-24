@@ -12,6 +12,7 @@
 #include <QUuid>
 #include <algorithm>
 #include <QFile>
+#include <QMutex>
 
 namespace database {
 /**
@@ -34,7 +35,6 @@ namespace database {
          * необходимо выполнить `PRAGMA foreign_keys = ON` при открытии БД.
          */
     namespace sqllite_requests {
-
         // ==================== CREATE TABLES ====================
 
         /**
@@ -281,6 +281,7 @@ namespace database {
 
     class DatabaseManager {
     private:
+        QRecursiveMutex mutex;
         QString connectionName;
         QSqlDatabase db_;
         void createTables();

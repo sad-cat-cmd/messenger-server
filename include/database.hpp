@@ -115,10 +115,12 @@ namespace database {
                             number_msg INTEGER NOT NULL DEFAULT 0,
                             is_readed INTEGER NOT NULL DEFAULT 0,
                             is_file INTEGER NOT NULL DEFAULT 0,
+                            size_file INTEGER NOT NULL DEFAULT 0,
                             CHECK (is_file IN (1, 0)),
                             CHECK (is_readed IN (0, 1)),
                             CHECK (number_msg >= 0),
                             CHECK ((LENGTH(text_msg) >= 1 AND LENGTH(text_msg) <= 1000 AND is_file == 0) OR (LENGTH(text_msg) >= 1 AND LENGTH(text_msg) <= 255 AND is_file == 1)),
+                            CHECK ((size_file == 0 AND is_file == 0) OR (size_file > 0 AND is_file == 1))
                             FOREIGN KEY (id_parent_chat) REFERENCES chats(id) ON DELETE CASCADE,
                             FOREIGN KEY (owner) REFERENCES users(id) ON DELETE CASCADE,
                             FOREIGN KEY (receiver) REFERENCES users(id) ON DELETE CASCADE
@@ -192,8 +194,8 @@ namespace database {
                      * @note created_at заполняется автоматически (DEFAULT CURRENT_TIMESTAMP).
                      */
         const QString INSERT_MSG =
-            "INSERT INTO messages(id, id_parent_chat, owner, receiver, text_msg, number_msg, is_file) "
-            "VALUES (?, ?, ?, ?, ?, ?, ?)";
+            "INSERT INTO messages(id, id_parent_chat, owner, receiver, text_msg, number_msg, is_file, size_file) "
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
         /**
                      * @brief Вставка нового файла.
@@ -310,7 +312,8 @@ namespace database {
                                   const QString & idReceiver,
                                   const QString & textMsg,
                                   const quint64 numMsg,
-                                  const bool flagFile);
+                                  const bool flagFile,
+                                  const quint64 sizeFile);
         models::Message * getMsgById (const QString idMsg);
         QList<models::Message *> getAllMsgsByChatId (const QString & chatId);
         QList<models::Message *> getMsgsByChatIdIndexFrom (const QString & chatId,
@@ -324,7 +327,8 @@ namespace database {
                                    const QString & idOwner,
                                    const QString & idReceiver,
                                    const QString & textMsg,
-                                   const quint64 numMsg);
+                                   const quint64 numMsg,
+                                   const quint64 sizeFile);
 
         models::File * getFileByMsgId (const QString &idMsg);
     };

@@ -294,7 +294,8 @@ models::Message * database::DatabaseManager::addMsg (const QString & idMsg,
                                                      const QString & idReceiver,
                                                      const QString & textMsg,
                                                      const quint64 numMsg,
-                                                     const bool flagFile)
+                                                     const bool flagFile,
+                                                     const quint64 sizeFile)
 {
     QString msgErr;
     {
@@ -307,6 +308,7 @@ models::Message * database::DatabaseManager::addMsg (const QString & idMsg,
         insertQuery.addBindValue(textMsg);
         insertQuery.addBindValue(numMsg);
         insertQuery.addBindValue(flagFile ? 1 : 0);
+        insertQuery.addBindValue(sizeFile);
         if (!insertQuery.exec()) {
             msgErr = "DatabaseManager::addMsg(). INSERT_MSG failed: "
                      + insertQuery.lastError().text();
@@ -349,6 +351,7 @@ models::Message * database::DatabaseManager::getMsgById (const QString idMsg)
             pMsg->numberMsg = selectQuery.value("number_msg").toString().toLongLong();
             pMsg->isReaded = selectQuery.value("is_readed").toInt();
             pMsg->isFile = selectQuery.value("is_file").toInt();
+            pMsg->sizeFile = selectQuery.value("size_file").toLongLong();
             return pMsg;
         }
     }
@@ -378,6 +381,7 @@ QList<models::Message *> database::DatabaseManager::getAllMsgsByChatId (const QS
             pMsg->numberMsg = selectQuery.value("number_msg").toString().toLongLong();
             pMsg->isReaded = selectQuery.value("is_readed").toString().toInt();
             pMsg->isFile = selectQuery.value("is_file").toString().toInt();
+            pMsg->sizeFile = selectQuery.value("size_file").toLongLong();
             msgs.push_back(pMsg);
         }
     }
@@ -409,6 +413,7 @@ QList<models::Message *> database::DatabaseManager::getMsgsByChatIdIndexFrom (co
             pMsg->numberMsg = selectQuery.value("number_msg").toString().toLongLong();
             pMsg->isReaded = selectQuery.value("is_readed").toString().toInt();
             pMsg->isFile = selectQuery.value("is_file").toString().toInt();
+            pMsg->sizeFile = selectQuery.value("size_file").toLongLong();
             msgs.push_back(pMsg);
         }
     }
@@ -447,7 +452,8 @@ models::File * database::DatabaseManager::addMsgFile (const QString & idFile,
                                                       const QString & idOwner,
                                                       const QString & idReceiver,
                                                       const QString & textMsg,
-                                                      const quint64 numMsg)
+                                                      const quint64 numMsg,
+                                                      const quint64 sizeFile)
 {
     QString msgErr;
 
@@ -459,7 +465,8 @@ models::File * database::DatabaseManager::addMsgFile (const QString & idFile,
                          idReceiver,
                          textMsg,
                          numMsg,
-                         true);
+                         true,
+                         sizeFile);
         }
         catch (custom_exc::database::ExceptionDateBase & exc) {
             throw exc;

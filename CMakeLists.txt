@@ -66,6 +66,7 @@ add_executable(database_tests
     src/database.cpp
     src/exceptions.cpp
     include/database.hpp
+    tests/files_test.cpp
 )
 
 target_include_directories(database_tests

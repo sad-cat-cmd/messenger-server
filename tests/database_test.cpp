@@ -7,7 +7,7 @@
 #include "database.hpp"
 #include "models.hpp"
 
-class DatabaseFileTest : public ::testing::Test {
+class DatabaseTest : public ::testing::Test {
 protected:
     std::unique_ptr<QTemporaryDir> tempDir;
     std::unique_ptr<database::DatabaseManager> manager;
@@ -42,7 +42,7 @@ protected:
 
 // ==================== ТЕСТ 1: Файл создан ====================
 
-TEST_F(DatabaseFileTest, DatabaseFileIsCreated) {
+TEST_F(DatabaseTest, DatabaseFileIsCreated) {
     EXPECT_TRUE(QFile::exists(dbPath));
     EXPECT_GT(QFile(dbPath).size(), 0)
         << "Database file is empty";
@@ -50,7 +50,7 @@ TEST_F(DatabaseFileTest, DatabaseFileIsCreated) {
 
 // ==================== ТЕСТ 2: Таблицы созданы ====================
 
-TEST_F(DatabaseFileTest, TablesAreCreated) {
+TEST_F(DatabaseTest, TablesAreCreated) {
     QSqlDatabase db = manager->getDatabase();
 
     QSqlQuery query(db);
@@ -71,7 +71,7 @@ TEST_F(DatabaseFileTest, TablesAreCreated) {
 
 // ==================== ТЕСТ 3: Индексы созданы ====================
 
-TEST_F(DatabaseFileTest, IndexesAreCreated) {
+TEST_F(DatabaseTest, IndexesAreCreated) {
     QSqlDatabase db = manager->getDatabase();
 
     QSqlQuery query(db);
@@ -91,7 +91,7 @@ TEST_F(DatabaseFileTest, IndexesAreCreated) {
 
 // ==================== ТЕСТ 4: AddUser и GetUserById ====================
 
-TEST_F(DatabaseFileTest, AddUserAndRetrieve) {
+TEST_F(DatabaseTest, AddUserAndRetrieve) {
     auto* user = manager->addUser("user-123", "testuser", "hashed_password");
     ASSERT_NE(user, nullptr);
     EXPECT_EQ(user->id.toStdString(), "user-123");
@@ -106,7 +106,7 @@ TEST_F(DatabaseFileTest, AddUserAndRetrieve) {
 
 // ==================== ТЕСТ 5: Данные сохраняются на диск ====================
 
-TEST_F(DatabaseFileTest, DataPersistsAcrossReopen) {
+TEST_F(DatabaseTest, DataPersistsAcrossReopen) {
     // 1. Добавляем пользователя
     auto* user = manager->addUser("user-persist", "persist_user", "hash");
     ASSERT_NE(user, nullptr);
@@ -128,7 +128,7 @@ TEST_F(DatabaseFileTest, DataPersistsAcrossReopen) {
 
 // ==================== ТЕСТ 6: FOREIGN KEY работает ====================
 
-TEST_F(DatabaseFileTest, ForeignKeysAreEnabled) {
+TEST_F(DatabaseTest, ForeignKeysAreEnabled) {
     QSqlDatabase db = manager->getDatabase();
 
     QSqlQuery query(db);
@@ -141,7 +141,7 @@ TEST_F(DatabaseFileTest, ForeignKeysAreEnabled) {
 
 // ==================== ТЕСТ 7 (обновлён): CASCADE удаляет чат И сообщения ====================
 
-TEST_F(DatabaseFileTest, DeleteCascadeWorks) {
+TEST_F(DatabaseTest, DeleteCascadeWorks) {
     // 1. Создаём пользователей
     auto* u1 = manager->addUser("u1", "user1", "hash1");
     auto* u2 = manager->addUser("u2", "user2", "hash2");
@@ -184,7 +184,7 @@ TEST_F(DatabaseFileTest, DeleteCascadeWorks) {
 }
 // ==================== ТЕСТ 8: AddChat с сортировкой ====================
 
-TEST_F(DatabaseFileTest, AddChatSortsUserIds) {
+TEST_F(DatabaseTest, AddChatSortsUserIds) {
     // ==================== ШАГ 1: Создаём пользователей ====================
     auto* uA = manager->addUser("user-a", "User A", "hash_a");
     ASSERT_NE(uA, nullptr) << "Failed to create user-a";
@@ -207,7 +207,7 @@ TEST_F(DatabaseFileTest, AddChatSortsUserIds) {
 
 // ==================== ТЕСТ 9: UNIQUE constraint ====================
 
-TEST_F(DatabaseFileTest, DuplicateUserThrows) {
+TEST_F(DatabaseTest, DuplicateUserThrows) {
     auto* u1 = manager->addUser("dup-id", "user1", "hash1");
     ASSERT_NE(u1, nullptr);
     delete u1;
@@ -220,7 +220,7 @@ TEST_F(DatabaseFileTest, DuplicateUserThrows) {
 
 // ==================== ТЕСТ 10: Транзакции ====================
 
-TEST_F(DatabaseFileTest, TransactionRollback) {
+TEST_F(DatabaseTest, TransactionRollback) {
     QSqlDatabase db = manager->getDatabase();
 
     db.transaction();
@@ -236,7 +236,7 @@ TEST_F(DatabaseFileTest, TransactionRollback) {
 }
 // ==================== ТЕСТ 11: AddMsg с текстом ====================
 
-TEST_F(DatabaseFileTest, AddTextMessage) {
+TEST_F(DatabaseTest, AddTextMessage) {
     auto* u1 = manager->addUser("user-a", "User A", "hash_a");
     auto* u2 = manager->addUser("user-b", "User B", "hash_b");
     delete u1;
@@ -263,7 +263,7 @@ TEST_F(DatabaseFileTest, AddTextMessage) {
 }
 // ==================== ТЕСТ 12: AddMsg с файлом ====================
 
-TEST_F(DatabaseFileTest, AddFileMessage) {
+TEST_F(DatabaseTest, AddFileMessage) {
     auto* u1 = manager->addUser("user-a", "User A", "hash_a");
     auto* u2 = manager->addUser("user-b", "User B", "hash_b");
     delete u1;
@@ -291,7 +291,7 @@ TEST_F(DatabaseFileTest, AddFileMessage) {
 }
 // ==================== ТЕСТ 13: GetAllMsgsByChatId ====================
 
-TEST_F(DatabaseFileTest, GetAllMsgsByChatId) {
+TEST_F(DatabaseTest, GetAllMsgsByChatId) {
     auto* u1 = manager->addUser("user-a", "User A", "hash_a");
     auto* u2 = manager->addUser("user-b", "User B", "hash_b");
     delete u1;
@@ -328,7 +328,7 @@ TEST_F(DatabaseFileTest, GetAllMsgsByChatId) {
 }
 // ==================== ТЕСТ 14: Сообщение слишком длинное ====================
 
-TEST_F(DatabaseFileTest, MessageTooLongThrows) {
+TEST_F(DatabaseTest, MessageTooLongThrows) {
     auto* u1 = manager->addUser("user-a", "User A", "hash_a");
     auto* u2 = manager->addUser("user-b", "User B", "hash_b");
     delete u1;
@@ -346,7 +346,7 @@ TEST_F(DatabaseFileTest, MessageTooLongThrows) {
 }
 // ==================== ТЕСТ 15: Имя файла слишком длинное ====================
 
-TEST_F(DatabaseFileTest, FileNameTooLongThrows) {
+TEST_F(DatabaseTest, FileNameTooLongThrows) {
     auto* u1 = manager->addUser("user-a", "User A", "hash_a");
     auto* u2 = manager->addUser("user-b", "User B", "hash_b");
     delete u1;
@@ -364,7 +364,7 @@ TEST_F(DatabaseFileTest, FileNameTooLongThrows) {
 }
 // ==================== ТЕСТ 16: Граничные длины ====================
 
-TEST_F(DatabaseFileTest, MessageBoundaryLengths) {
+TEST_F(DatabaseTest, MessageBoundaryLengths) {
     auto* u1 = manager->addUser("user-a", "User A", "hash_a");
     auto* u2 = manager->addUser("user-b", "User B", "hash_b");
     delete u1;
@@ -394,7 +394,7 @@ TEST_F(DatabaseFileTest, MessageBoundaryLengths) {
 }
 // ==================== ТЕСТ 17: Пустой текст ====================
 
-TEST_F(DatabaseFileTest, EmptyTextThrows) {
+TEST_F(DatabaseTest, EmptyTextThrows) {
     auto* u1 = manager->addUser("user-a", "User A", "hash_a");
     auto* u2 = manager->addUser("user-b", "User B", "hash_b");
     delete u1;
@@ -410,7 +410,7 @@ TEST_F(DatabaseFileTest, EmptyTextThrows) {
 }
 // ==================== ТЕСТ 18: GetMsgsByChatIdIndexFrom ====================
 
-TEST_F(DatabaseFileTest, GetMsgsByChatIdIndexFrom_Success) {
+TEST_F(DatabaseTest, GetMsgsByChatIdIndexFrom_Success) {
     auto* u1 = manager->addUser("user-a", "User A", "hash_a");
     auto* u2 = manager->addUser("user-b", "User B", "hash_b");
     delete u1;
@@ -441,7 +441,7 @@ TEST_F(DatabaseFileTest, GetMsgsByChatIdIndexFrom_Success) {
 }
 // ==================== ТЕСТ 19: GetMsgsByChatIdIndexFrom с 0 ====================
 
-TEST_F(DatabaseFileTest, GetMsgsByChatIdIndexFrom_FromZero) {
+TEST_F(DatabaseTest, GetMsgsByChatIdIndexFrom_FromZero) {
     auto* u1 = manager->addUser("user-a", "User A", "hash_a");
     auto* u2 = manager->addUser("user-b", "User B", "hash_b");
     delete u1;
@@ -464,7 +464,7 @@ TEST_F(DatabaseFileTest, GetMsgsByChatIdIndexFrom_FromZero) {
 }
 // ==================== ТЕСТ 20: GetMsgsByChatIdIndexFrom — пустой результат ====================
 
-TEST_F(DatabaseFileTest, GetMsgsByChatIdIndexFrom_EmptyResult) {
+TEST_F(DatabaseTest, GetMsgsByChatIdIndexFrom_EmptyResult) {
     auto* u1 = manager->addUser("user-a", "User A", "hash_a");
     auto* u2 = manager->addUser("user-b", "User B", "hash_b");
     delete u1;
@@ -481,14 +481,14 @@ TEST_F(DatabaseFileTest, GetMsgsByChatIdIndexFrom_EmptyResult) {
 }
 // ==================== ТЕСТ 21: GetMsgsByChatIdIndexFrom — неверный чат ====================
 
-TEST_F(DatabaseFileTest, GetMsgsByChatIdIndexFrom_WrongChat) {
+TEST_F(DatabaseTest, GetMsgsByChatIdIndexFrom_WrongChat) {
     auto msgs = manager->getMsgsByChatIdIndexFrom("non-existent-chat", 0);
     EXPECT_EQ(msgs.size(), 0);
 }
 
 // ==================== ТЕСТ 22: Текст с size_file > 0 отклоняется ====================
 
-TEST_F(DatabaseFileTest, TextMessageWithNonZeroSizeThrows) {
+TEST_F(DatabaseTest, TextMessageWithNonZeroSizeThrows) {
     auto* u1 = manager->addUser("user-a", "User A", "hash_a");
     auto* u2 = manager->addUser("user-b", "User B", "hash_b");
     delete u1;
@@ -505,7 +505,7 @@ TEST_F(DatabaseFileTest, TextMessageWithNonZeroSizeThrows) {
 }
 // ==================== ТЕСТ 23: Файл с size_file = 0 отклоняется ====================
 
-TEST_F(DatabaseFileTest, FileMessageWithZeroSizeThrows) {
+TEST_F(DatabaseTest, FileMessageWithZeroSizeThrows) {
     auto* u1 = manager->addUser("user-a", "User A", "hash_a");
     auto* u2 = manager->addUser("user-b", "User B", "hash_b");
     delete u1;
@@ -522,7 +522,7 @@ TEST_F(DatabaseFileTest, FileMessageWithZeroSizeThrows) {
 }
 // ==================== ТЕСТ 24: Границы size_file ====================
 
-TEST_F(DatabaseFileTest, SizeFileBoundaryValues) {
+TEST_F(DatabaseTest, SizeFileBoundaryValues) {
     auto* u1 = manager->addUser("user-a", "User A", "hash_a");
     auto* u2 = manager->addUser("user-b", "User B", "hash_b");
     delete u1;
@@ -547,7 +547,7 @@ TEST_F(DatabaseFileTest, SizeFileBoundaryValues) {
 }
 // ==================== ТЕСТ 25: getMsgById возвращает sizeFile ====================
 
-TEST_F(DatabaseFileTest, GetMsgByIdPreservesSizeFile) {
+TEST_F(DatabaseTest, GetMsgByIdPreservesSizeFile) {
     auto* u1 = manager->addUser("user-a", "User A", "hash_a");
     auto* u2 = manager->addUser("user-b", "User B", "hash_b");
     delete u1;
@@ -565,3 +565,5 @@ TEST_F(DatabaseFileTest, GetMsgByIdPreservesSizeFile) {
     EXPECT_EQ(fetched->sizeFile, fileSize);
     delete fetched;
 }
+
+

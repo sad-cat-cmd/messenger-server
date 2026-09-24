@@ -55,14 +55,45 @@ namespace custom_exc {
          */
         qint64 getStatusCode() noexcept;
     };
+    /**
+     * @namespace custom_exc::database
+     * @brief Исключения для работы с базой данных
+     *
+     * @details Содержит исключения, возникающие при обработке операций в базе данных
+     */
     namespace database {
+        /**
+         * @class ExceptionDateBase
+         * @brief Исключение, возникающее при работе с БД.
+         * @see ExceptionCreateRequest
+         */
         class ExceptionDateBase : public BaseException {
         private:
         public:
+            /**
+             * @brief Конструктор исключения.
+             * @param msg Текстовое описание ошибки (не должно быть пустым)
+             * @param code Код ошибки
+             */
             ExceptionDateBase(const QString & msg,
                               const quint64 code);
         };
-    }
+
+        /**
+         * @class ExceptionFile
+         * @brief Исключение, возникающее при работе с файлами.
+         * @see ExceptionCreateRequest
+         */
+        class ExceptionFile : public BaseException {
+            /**
+             * @brief Конструктор исключения.
+             * @param msg Текстовое описание ошибки (не должно быть пустым)
+             * @param code Код ошибки
+             */
+            ExceptionFile(const QString & msg,
+                              const quint64 code);
+        };
+    } // namespace database
 
     /**
      * @namespace custom_exc::network

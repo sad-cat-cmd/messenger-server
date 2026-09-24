@@ -29,6 +29,11 @@ custom_exc::database::ExceptionDateBase::ExceptionDateBase(const QString & msg,
                                                            : BaseException(msg, code)
 {}
 
+custom_exc::database::ExceptionFile::ExceptionFile(const QString & msg,
+                                                   const quint64 code)
+                                                   : BaseException(msg, code)
+{}
+
 custom_exc::network::ExceptionServer::ExceptionServer(const QString& msg,
                                                       const qint64 code)
                                                       : BaseException(msg, code)

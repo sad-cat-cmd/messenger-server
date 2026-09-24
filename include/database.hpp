@@ -11,6 +11,7 @@
 #include <QList>
 #include <QUuid>
 #include <algorithm>
+#include <QFile>
 
 namespace database {
 /**
@@ -331,6 +332,15 @@ namespace database {
                                    const quint64 sizeFile);
 
         models::File * getFileByMsgId (const QString &idMsg);
+    };
+
+    class FileManager {
+    private:
+        QString filePath;
+    public:
+        FileManager(const QString & filePath);
+        QList<models::FileChunk *> getChunksFromFile(const qint64 sizeChunk);
+        void saveFileFromFileChunks(QList<models::FileChunk *> chunks);
     };
 }
 

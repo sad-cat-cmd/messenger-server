@@ -483,7 +483,7 @@ models::File * database::DatabaseManager::addMsgFile (const QString & idFile,
         }
         if (insertQuery.numRowsAffected() == 0) {
             throw custom_exc::database::ExceptionDateBase(
-                "atabaseManager::addMsgFile(). No rows inserted", 13);
+                "DatabaseManager::addMsgFile(). No rows inserted", 13);
         }
     }
     try {
@@ -518,3 +518,115 @@ models::File * database::DatabaseManager::getFileByMsgId (const QString &idMsg)
     }
     return nullptr;
 }
+
+database::FileManager::FileManager(const QString & filePath)
+                                   : filePath(filePath)
+{
+    if (this->filePath.isEmpty()){
+        throw custom_exc::database::ExceptionDateBase("FileManager. Param filePath is empty",
+                                                      1);
+    }
+}
+QList<models::FileChunk *> database::FileManager::getChunksFromFile(const qint64 sizeChunk)
+{
+    if (sizeChunk <= 0) {
+        throw custom_exc::database::ExceptionDateBase("FileManager::getChunksFromFile(). Param sizeChunk is less or equils 0",
+                                                      2);
+    }
+
+    QFile file(this->filePath);
+    if (!file.open(QIODevice::ReadOnly)) {
+        throw custom_exc::database::ExceptionDateBase("FileManager::getChunksFromFile(). File is not open. " + file.errorString(),
+                                                      2);
+    }
+    QByteArray fileData = file.readAll();
+    file.close();
+
+    quint64 totalSize = fileData.size();
+    quint64 totalChunks = (totalSize + sizeChunk - 1) / sizeChunk;
+    if (totalChunks == 0) {
+        return {};
+    }
+    QList<models::FileChunk *> chunks = QList<models::FileChunk *>();
+    chunks.reserve(static_cast<int>(totalChunks));;
+
+    for (quint64 i = 0; i < totalChunks; ++i) {
+        auto* chunk = new models::FileChunk;
+        chunk->numberChunk = i;
+
+        quint64 offset = i * sizeChunk;
+        quint64 remaining = totalSize - offset;
+        quint64 currentSize = qMin(static_cast<quint64>(sizeChunk), remaining);
+
+        chunk->data = fileData.mid(static_cast<int>(offset),
+                                   static_cast<int>(currentSize));
+
+        chunks.append(chunk);
+    }
+
+    return chunks;
+}
+void database::FileManager::saveFileFromFileChunks(QList<models::FileChunk*> chunks)
+{
+    // 1. Проверяем, что список не пуст
+    if (chunks.isEmpty()) {
+        throw custom_exc::database::ExceptionDateBase(
+            "FileManager::saveFileFromFileChunks(). Chunks list is empty",
+            3
+            );
+    }
+
+    // 2. Сортируем по номеру чанка (на случай, если пришли не по порядку)
+    std::sort(chunks.begin(), chunks.end(),
+              [](models::FileChunk* a, models::FileChunk* b) {
+                  return a->numberChunk < b->numberChunk;
+              });
+
+    // 3. Проверяем порядок (0, 1, 2, ...)
+    for (int i = 0; i < chunks.size(); ++i) {
+        if (chunks[i] == nullptr) {
+            throw custom_exc::database::ExceptionDateBase(
+                "FileManager::saveFileFromFileChunks(). Null chunk",
+                3
+                );
+        }
+        if (chunks[i]->numberChunk != static_cast<quint64>(i)) {
+            throw custom_exc::database::ExceptionDateBase(
+                QString("FileManager::saveFileFromFileChunks(). "
+                        "Chunk out of order: expected %1, got %2")
+                    .arg(i)
+                    .arg(chunks[i]->numberChunk),
+                3
+                );
+        }
+    }
+
+    // 5. Открываем файл на запись
+    QFile file(this->filePath);
+    if (!file.open(QIODevice::WriteOnly)) {
+        throw custom_exc::database::ExceptionDateBase(
+            "FileManager::saveFileFromFileChunks(). File is not open. "
+                + file.errorString(),
+            3
+            );
+    }
+
+    // 6. Записываем каждый чанк
+    for (auto* chunk : chunks) {
+        qint64 written = file.write(chunk->data);
+        if (written != chunk->data.size()) {
+            file.close();
+            throw custom_exc::database::ExceptionDateBase(
+                QString("FileManager::saveFileFromFileChunks(). "
+                        "Partial write at chunk %1: %2/%3")
+                    .arg(chunk->numberChunk)
+                    .arg(written)
+                    .arg(chunk->data.size()),
+                3
+                );
+        }
+    }
+
+    file.close();
+}
+

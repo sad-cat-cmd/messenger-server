@@ -55,6 +55,15 @@ namespace models {
         QString idParentMsg;    ///< ID сообщения
         QString localPathFile;  ///< Локальный путь
     };
+
+    /**
+     * @struct FileChunk
+     * @brief Модель чанка файла
+     */
+    struct FileChunk {
+        quint64 numberChunk;    ///< порядковый номер чанка
+        QByteArray data;        ///< данные чанка
+    };
 } // namespace models
 
 #endif // MODELS_HPP
